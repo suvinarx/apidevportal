@@ -60,10 +60,29 @@ router.post('/:catalogId/apis', async (req, res) => {
 // Edit Catalog
 router.put('/:catalogId', async (req, res) => {
   try {
-    const { name, description, color } = req.body;
+    const {
+      name,
+      description,
+      color,
+      visibility,
+      status,
+      accessRoles,
+      tags,
+      openapiSpec
+    } = req.body;
     const updated = await Catalog.findByIdAndUpdate(
       req.params.catalogId,
-      { name, description, color, updatedAt: Date.now() },
+      {
+        name,
+        description,
+        color,
+        visibility,
+        status,
+        accessRoles,
+        tags,
+        openapiSpec,
+        updatedAt: Date.now()
+      },
       { new: true }
     );
     res.json(updated);

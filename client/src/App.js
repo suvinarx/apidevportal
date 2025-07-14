@@ -34,11 +34,11 @@ function App() {
     await loadCatalogs()
   }
 
-  const handleEditCatalog = async (data) => {
-    await editCatalog(editCatalogData._id, data)
-    setEditCatalogData(null)
-    await loadCatalogs()
-  }
+const handleEditCatalog = async (updatedCatalog) => {
+  // Call the backend API to update
+  await editCatalog(updatedCatalog._id, updatedCatalog); // <-- this makes the PUT request
+  await loadCatalogs(); // Refresh list
+};
 
   const handleDeleteCatalog = async (cat) => {
     if (window.confirm("Delete this catalog and all its APIs?")) {
@@ -69,15 +69,16 @@ const handleSelectCatalog = async (catalog) => {
       {view === "catalogs" && (
         <>
           <CatalogList
-            catalogs={filteredCatalogs}
-            onSelect={handleSelectCatalog}
-            onAddClick={() => setShowAddCatalog(true)}
-            search={searchCatalog}
-            setSearch={setSearchCatalog}
-            onEdit={setEditCatalogData}
-            onDelete={handleDeleteCatalog}
-            onImported={loadCatalogs}
-          />
+  catalogs={filteredCatalogs}
+  onSelect={handleSelectCatalog}
+  onAddClick={() => setShowAddCatalog(true)}
+  search={searchCatalog}
+  setSearch={setSearchCatalog}
+  onEdit={handleEditCatalog}   // <-- not setEditCatalogData
+  onDelete={handleDeleteCatalog}
+  onImported={loadCatalogs}
+/>
+
 
           {/* Add Catalog Dialog */}
           {/* <AddCatalogForm
