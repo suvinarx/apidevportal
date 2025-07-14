@@ -15,7 +15,7 @@ COPY . .
 
 # Expose the app port
 EXPOSE 5000
-ENV MONGO_URI=http://localhost:3000/
+ENV MONGO_URI=mongodb://localhost:27017/api-catalog-db
 ENV PORT=5000
 # Start your app
 CMD ["node", "index.js"]
