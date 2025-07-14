@@ -28,7 +28,7 @@
 // export const importOpenapiCatalog = (data) =>
 //   axios.post(`${BASE_URL}/catalogs/import`, data);
 import axios from "axios";
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export const getCatalogs = () => axios.get(`${BASE_URL}/catalogs`);
 export const addCatalog = (data) => axios.post(`${BASE_URL}/catalogs`, data);
