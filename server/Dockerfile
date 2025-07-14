@@ -15,7 +15,7 @@ COPY . .
 
 # Expose the app port
 EXPOSE 5000
-ENV MONGO_URI=mongodb+srv://meetlakhani98787:QmjuMuyZJMW4uVAG@cluster0.ofmfway.mongodb.net/
+ENV MONGO_URI=http://localhost:3000/
 ENV PORT=5000
 # Start your app
 CMD ["node", "index.js"]
