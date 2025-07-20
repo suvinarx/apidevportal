@@ -69,7 +69,7 @@ const DialogContent = React.forwardRef(({ className = "", children, ...props }, 
 
   if (!open) return null
 
-  const classes = `bg-white rounded-lg shadow-lg p-6 w-full max-w-lg mx-4 ${className}`
+  const classes = `bg-white rounded-lg shadow-lg p-6 w-full max-2xl-lg  ${className}`
 
   // Prevent clicks inside the modal from closing it
   const handleContentClick = (e) => {

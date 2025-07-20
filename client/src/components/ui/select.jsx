@@ -88,7 +88,7 @@ const SelectContent = React.forwardRef(({ className = "", children, ...props }, 
 
   if (!isOpen) return null
 
-  const classes = `absolute top-full left-0 z-50 w-full min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 ${className}`
+  const classes = `absolute top-full left-0 z-50 w-[200px] min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white text-gray-950 shadow-md animate-in fade-in-0 zoom-in-95 ${className}`
 
   const handleContentClick = (e) => {
     e.stopPropagation()

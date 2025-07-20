@@ -16,8 +16,8 @@ router.get('/', async (req, res) => {
 // Create a catalog
 router.post('/', async (req, res) => {
   try {
-    const { name, description, color } = req.body;
-    const catalog = new Catalog({ name, description, color });
+    const { name, description, color, category } = req.body;
+    const catalog = new Catalog({ name, description, color, category });
     await catalog.save();
     res.status(201).json(catalog);
   } catch (err) {
@@ -38,7 +38,7 @@ router.get('/:catalogId/apis', async (req, res) => {
 // Add a new API to a catalog
 router.post('/:catalogId/apis', async (req, res) => {
   try {
-    const { name, endpoint, method, description, version, status, tags,openapiSpec } = req.body;
+    const { name, endpoint, method, description, version, status, tags, openapiSpec } = req.body;
     const api = new Api({
       catalogId: req.params.catalogId,
       name,
@@ -161,7 +161,8 @@ router.post('/import', async (req, res) => {
       visibility,
       status,
       accessRoles,
-      tags
+      tags,
+      category
     } = req.body;
 
     if (!openapiSpec || !openapiSpec.info || !openapiSpec.paths) {
@@ -178,6 +179,7 @@ router.post('/import', async (req, res) => {
       status: status || 'active',
       accessRoles: accessRoles && accessRoles.length ? accessRoles : ['admin'],
       tags: tags && tags.length ? tags : [],
+      category: category || 'order', // Default to 'order' if not provided
       openapiSpec
     });
 

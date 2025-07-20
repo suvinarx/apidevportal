@@ -1,107 +1,127 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   getCatalogs,
-  addCatalog,
   editCatalog,
   deleteCatalog,
-  importOpenapiCatalog,
-} from "./api"
-import CatalogList from "./components/CatalogList"
-import AddCatalogForm from "./components/AddCatalogForm"
-import ApiWorkspace from "./components/ApiWorkspace" // This is your Redoc-based component!
-import { getCatalogDetail } from "./api";
+  getCatalogDetail,
+} from "./api";
+import CatalogList from "./components/CatalogList";
+import ApiWorkspace from "./components/ApiWorkspace";
+import UnderConstruction from "./pages/UnderConstruction";
 
-function App() {
-  const [view, setView] = useState("catalogs") // catalogs | apis
-  const [catalogs, setCatalogs] = useState([])
-  const [selectedCatalog, setSelectedCatalog] = useState(null)
-  const [searchCatalog, setSearchCatalog] = useState("")
-  const [editCatalogData, setEditCatalogData] = useState(null)
-  const [showAddCatalog, setShowAddCatalog] = useState(false)
+function CatalogApp({ onNavigate }) {
+  const [view, setView] = useState("catalogs"); // 'catalogs' or 'api'
+  const [catalogs, setCatalogs] = useState([]);
+  const [selectedCatalog, setSelectedCatalog] = useState(null);
+  const [searchCatalog, setSearchCatalog] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   useEffect(() => {
-    loadCatalogs()
-  }, [])
+    loadCatalogs();
+  }, []);
 
   const loadCatalogs = async () => {
-    const res = await getCatalogs()
-    setCatalogs(res.data)
-  }
-
-  const handleAddCatalog = async (data) => {
-    await addCatalog(data)
-    setShowAddCatalog(false)
-    await loadCatalogs()
-  }
-
-const handleEditCatalog = async (updatedCatalog) => {
-  // Call the backend API to update
-  await editCatalog(updatedCatalog._id, updatedCatalog); // <-- this makes the PUT request
-  await loadCatalogs(); // Refresh list
-};
-
-  const handleDeleteCatalog = async (cat) => {
-    if (window.confirm("Delete this catalog and all its APIs?")) {
-      await deleteCatalog(cat._id)
-      await loadCatalogs()
+    setLoading(true);
+    try {
+      const res = await getCatalogs();
+      setCatalogs(res.data);
+    } catch (error) {
+      console.error("Failed to load catalogs:", error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-const handleSelectCatalog = async (catalog) => {
-  // Fetch full catalog including openapiSpec
-  const res = await getCatalogDetail(catalog._id);
-  setSelectedCatalog(res.data);
-  setView("apis");
-};
+  const handleSelectCatalog = async (catalog) => {
+    setLoading(true);
+    try {
+      const res = await getCatalogDetail(catalog._id);
+      setSelectedCatalog(res.data);
+      setView("api");
+    } catch (error) {
+      console.error("Failed to load catalog details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBackToCatalogs = () => {
-    setSelectedCatalog(null)
-    setView("catalogs")
-    loadCatalogs()
-  }
+    setView("catalogs");
+    setSelectedCatalog(null);
+    loadCatalogs();
+  };
+
+  const handleEditCatalog = async (updatedCatalog) => {
+    try {
+      await editCatalog(updatedCatalog._id, updatedCatalog);
+      loadCatalogs();
+    } catch (error) {
+      console.error("Failed to update catalog:", error);
+    }
+  };
+
+  const handleDeleteCatalog = async (catalog) => {
+    if (window.confirm(`Are you sure you want to delete "${catalog.name}"?`)) {
+      try {
+        await deleteCatalog(catalog._id);
+        loadCatalogs();
+      } catch (error) {
+        console.error("Failed to delete catalog:", error);
+      }
+    }
+  };
 
   const filteredCatalogs = catalogs.filter((cat) =>
     cat.name.toLowerCase().includes(searchCatalog.toLowerCase())
-  )
+  );
 
   return (
     <div className="bg-gray-100 min-h-screen">
       {view === "catalogs" && (
-        <>
-          <CatalogList
-  catalogs={filteredCatalogs}
-  onSelect={handleSelectCatalog}
-  onAddClick={() => setShowAddCatalog(true)}
-  search={searchCatalog}
-  setSearch={setSearchCatalog}
-  onEdit={handleEditCatalog}   // <-- not setEditCatalogData
-  onDelete={handleDeleteCatalog}
-  onImported={loadCatalogs}
-/>
-
-
-          {/* Add Catalog Dialog */}
-          {/* <AddCatalogForm
-            open={showAddCatalog}
-            onSave={handleAddCatalog}
-            onCancel={() => setShowAddCatalog(false)}
-          /> */}
-
-          {/* Edit Catalog Dialog */}
-          {/* <AddCatalogForm
-            open={!!editCatalogData}
-            onSave={handleEditCatalog}
-            onCancel={() => setEditCatalogData(null)}
-            initial={editCatalogData}
-          /> */}
-        </>
+        <CatalogList
+          catalogs={filteredCatalogs}
+          onSelect={handleSelectCatalog}
+          onEdit={handleEditCatalog}
+          onDelete={handleDeleteCatalog}
+          search={searchCatalog}
+          setSearch={setSearchCatalog}
+          onImported={loadCatalogs}
+          onAddClick={() => setShowImportDialog(true)}
+          showImportDialog={showImportDialog}
+          setShowImportDialog={setShowImportDialog}
+        />
       )}
-
-      {view === "apis" && selectedCatalog && (
+      {view === "api" && selectedCatalog && (
         <ApiWorkspace catalog={selectedCatalog} onBack={handleBackToCatalogs} />
       )}
     </div>
-  )
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Main app route */}
+        <Route path="/" element={<CatalogApp />} />
+
+        {/* Under Construction routes */}
+        <Route path="/blank" element={<UnderConstruction />} />
+        <Route path="/careers" element={<UnderConstruction />} />
+        <Route path="/blog" element={<UnderConstruction />} />
+        <Route path="/contact-us" element={<UnderConstruction />} />
+        <Route path="/press-kit" element={<UnderConstruction />} />
+        <Route path="/privacy-policy" element={<UnderConstruction />} />
+        <Route path="/terms-of-service" element={<UnderConstruction />} />
+        <Route path="/cookie-policy" element={<UnderConstruction />} />
+
+        {/* Fallback for any unmatched route */}
+        <Route path="*" element={<UnderConstruction />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
