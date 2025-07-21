@@ -3,6 +3,52 @@ const router = express.Router();
 const Catalog = require('../models/Catalog');
 const Api = require('../models/Api');
 const yaml = require("js-yaml");
+
+router.get('/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) return res.json([]);
+
+    // Search catalogs
+    const catalogs = await Catalog.find({
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { description: { $regex: q, $options: 'i' } },
+        { tags: { $regex: q, $options: 'i' } }
+      ]
+    }).limit(10);
+
+    // Search APIs
+    const apis = await Api.find({
+      $or: [
+        { endpoint: { $regex: q, $options: 'i' } },
+        { name: { $regex: q, $options: 'i' } }
+      ]
+    }).populate('catalogId', 'name').limit(10);
+
+    // Format results
+    res.json([
+      ...catalogs.map(c => ({
+        type: 'catalog',
+        id: c._id,
+        name: c.name,
+        catalogName: c.name
+      })),
+      ...apis.map(a => ({
+        type: 'api',
+        id: a._id,
+        name: a.endpoint,  // will show the path (eg: /pet)
+        method: a.method,
+        catalogId: a.catalogId?._id,
+        catalogName: a.catalogId?.name
+      }))
+    ]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Get all catalogs
 router.get('/', async (req, res) => {
   try {
@@ -212,6 +258,7 @@ router.post('/import', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
 
 
 module.exports = router;
