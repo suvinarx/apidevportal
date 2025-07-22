@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Search,
   Plus,
@@ -14,6 +14,7 @@ import {
   Code,
   TagIcon,
   Loader2,
+  AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,8 +47,12 @@ import { type Catalog, catalogApi, type CreateCatalogData, categoryApi, type Cat
 import ApiWorkspace from "@/components/api-workspace"
 
 // Category type
-type CategoryWithIcon = Category & { icon: any }
+import { ComponentType } from "react"
+import { LucideProps } from "lucide-react"
 
+type CategoryWithIcon = Category & {
+  icon?: ComponentType<LucideProps>;
+}
 const defaultCategories = [
   { id: "all", name: "All", icon: Grid3X3 },
   { id: "order", name: "Order", icon: ShoppingCart },
@@ -70,6 +75,36 @@ const RedocStandalone = ({ spec, options }: { spec: any; options: any }) => {
     </div>
   )
 }
+
+function FileSizeErrorModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md rounded-2xl shadow-xl border border-red-200 bg-white animate-fade-in">
+        <DialogHeader className="flex flex-col items-center gap-2 text-center">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-600">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <DialogTitle className="text-xl font-semibold text-red-600">
+            File Too Large
+          </DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            The file you are trying to upload exceeds the 1MB size limit. Please select a smaller file.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mt-4">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="w-full text-red-600 border-red-200 hover:bg-red-50 transition"
+          >
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 const getCategoryColor = (category?: string | { _id: string; name: string }) => {
   const categoryName = typeof category === "string" ? category : category?.name
@@ -132,14 +167,15 @@ export default function APICatalogDashboard() {
   const [isSearching, setIsSearching] = useState(false)
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>()
   const [docModalOpen, setDocModalOpen] = useState(false)
-
+  const [isFileSizeErrorModalOpen, setIsFileSizeErrorModalOpen] = useState(false);
   // Category management states
-  const [categories, setCategories] = useState<(Category & { icon: any })[]>([])
+  const [categories, setCategories] = useState<CategoryWithIcon[]>([])
   const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false)
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
   })
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form states
   const [formData, setFormData] = useState<CreateCatalogData>({
@@ -176,29 +212,24 @@ export default function APICatalogDashboard() {
     }
   }
 
-  const loadCategories = async () => {
-    try {
-      const data = await categoryApi.getAll()
-      // Add "All" category for filtering UI and map backend categories
-      setCategories([
-        { _id: "all", name: "All", icon: Grid3X3, createdAt: "", updatedAt: "" },
-        ...data.map((cat) => ({
-          ...cat,
-          icon: Package, // Default icon, can be made configurable
-        })),
-      ])
-      // Set default category for form if not already set
-      if (!formData.category && categories.length > 0) {
-  setFormData((prev) => ({ ...prev, category: categories[1]._id })); // categories[1] skips "all"
-}
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load categories",
-        variant: "destructive",
-      })
+ const loadCategories = async () => {
+  try {
+    const data: Category[] = await categoryApi.getAll();
+    const categoriesWithAll = [{ _id: "all", name: "All", createdAt: "", updatedAt: "" }, ...data] as CategoryWithIcon[];
+    setCategories(categoriesWithAll);
+
+    if (!formData.category && categoriesWithAll.length > 1) {
+      setFormData((prev) => ({ ...prev, category: categoriesWithAll[1]._id }));
     }
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to load categories",
+      variant: "destructive",
+    });
   }
+};
+
 
   const filteredCatalogs = catalogs.filter((catalog) => {
     // Handle both ObjectId string and populated category object
@@ -212,13 +243,14 @@ export default function APICatalogDashboard() {
     return matchesCategory && matchesSearch
   })
 
+
   const handleEdit = (catalog: Catalog) => {
     setSelectedCatalog(catalog)
     setFormData({
       name: catalog.name,
       description: catalog.description || "",
       color: catalog.color || "#059669",
-      category: catalog.category,
+      category: catalog.category as string, // Ensure this is a string ID
       visibility: catalog.visibility,
       status: catalog.status,
       accessRoles: catalog.accessRoles,
@@ -319,13 +351,19 @@ export default function APICatalogDashboard() {
     }
   }
 
+  const [tagsInput, setTagsInput] = useState((formData.tags || []).join(", "));
+
+  useEffect(() => {
+    setTagsInput((formData.tags || []).join(", "));
+  }, [formData.tags]);
+
   const handleTagsChange = (tagsString: string) => {
     const tags = tagsString
       .split(",")
       .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
-    setFormData({ ...formData, tags })
-  }
+      .filter((tag) => tag.length > 0);
+    setFormData({ ...formData, tags });
+  };
 
   // Handle category creation
   const handleAddCategory = async () => {
@@ -337,6 +375,7 @@ export default function APICatalogDashboard() {
       })
       return
     }
+
 
     // Check if category already exists locally (as UI feedback only)
     const categoryExists = categories.some((cat) => cat.name.toLowerCase() === categoryFormData.name.toLowerCase())
@@ -354,13 +393,16 @@ export default function APICatalogDashboard() {
       // POST to backend
       const newCategory = await categoryApi.create(categoryFormData)
 
-      setCategories([
-        ...categories,
-        {
-          ...newCategory,
-          icon: Package, // Default icon
-        },
-      ])
+      function toCategoryWithIcon(cat: Category): CategoryWithIcon {
+        return {
+          ...cat,
+          icon: Package as any,
+        }
+      }
+
+      setCategories([...categories, toCategoryWithIcon(newCategory)])
+
+
 
       // Reset form
       setCategoryFormData({ name: "", description: "" })
@@ -408,11 +450,11 @@ export default function APICatalogDashboard() {
                   key={category._id}
                   onClick={() => setSelectedCategory(category._id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${isActive
-                      ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? "text-emerald-600" : "text-gray-400"}`} />
+                  {Icon ? <Icon className={`w-5 h-5 ${isActive ? "text-emerald-600" : "text-gray-400"}`} /> : null}
                   <span className="font-medium">{category.name}</span>
                   {isActive && (
                     <div className="ml-auto w-1 h-6 bg-gradient-to-b from-emerald-400 to-yellow-400 rounded-full"></div>
@@ -655,6 +697,10 @@ export default function APICatalogDashboard() {
       </div>
 
       {/* Add/Edit API Modal */}
+      <FileSizeErrorModal
+        isOpen={isFileSizeErrorModalOpen}
+        onClose={() => setIsFileSizeErrorModalOpen(false)}
+      />
       <Dialog
         open={isAddModalOpen || isEditModalOpen}
         onOpenChange={(open) => {
@@ -763,8 +809,9 @@ export default function APICatalogDashboard() {
               <Label htmlFor="tags">Tags</Label>
               <Input
                 id="tags"
-                value={formData.tags.join(", ")}
-                onChange={(e) => handleTagsChange(e.target.value)}
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                onBlur={() => handleTagsChange(tagsInput)}
                 placeholder="Enter tags separated by commas"
               />
             </div>
@@ -781,40 +828,50 @@ export default function APICatalogDashboard() {
               >
                 <input
                   id="openapi"
+                  ref={fileInputRef}
                   type="file"
                   accept=".json,.yaml,.yml"
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   tabIndex={-1}
                   onClick={(e) => e.stopPropagation()} // Prevent bubbling to div to fix double dialog
                   onChange={async (e) => {
-                    setOpenApiFileError(null)
-                    const file = e.target.files?.[0]
-                    setOpenApiFile(file || null)
+                    setOpenApiFileError(null);
+                    const file = e.target.files?.[0];
+
                     if (!file) {
-                      setFormData({ ...formData, openapiSpec: undefined })
-                      return
+                      setOpenApiFile(null);
+                      setFormData({ ...formData, openapiSpec: undefined });
+                      return;
                     }
-                    // Limit file size to 1MB
+
                     if (file.size > 1048576) {
-                      setOpenApiFileError("File size exceeds 1MB limit.")
-                      setFormData({ ...formData, openapiSpec: undefined })
-                      return
+                      // Clear file input so user can re-select same file later if needed
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                      setOpenApiFile(null);
+                      setFormData({ ...formData, openapiSpec: undefined });
+                      setIsFileSizeErrorModalOpen(true);
+                      return;
                     }
-                    const ext = file.name.split(".").pop()?.toLowerCase()
+
+                    const ext = file.name.split(".").pop()?.toLowerCase();
                     if (!["json", "yml", "yaml"].includes(ext || "")) {
-                      setOpenApiFileError("Only .json, .yml, and .yaml files are supported.")
-                      setFormData({ ...formData, openapiSpec: undefined })
-                      return
+                      setOpenApiFileError("Only .json, .yml, and .yaml files are supported.");
+                      setFormData({ ...formData, openapiSpec: undefined });
+                      return;
                     }
+
                     try {
-                      let openapiSpec
-                      const text = await file.text()
-                      if (ext === "json") openapiSpec = JSON.parse(text)
-                      else openapiSpec = (await import("js-yaml")).default.load(text)
-                      setFormData({ ...formData, openapiSpec })
-                    } catch (err) {
-                      setOpenApiFileError("File parsing failed: " + (err?.message || "Invalid format"))
-                      setFormData({ ...formData, openapiSpec: undefined })
+                      let openapiSpec;
+                      const text = await file.text();
+                      if (ext === "json") openapiSpec = JSON.parse(text);
+                      else openapiSpec = (await import("js-yaml")).default.load(text);
+                      setFormData({ ...formData, openapiSpec });
+                      setOpenApiFile(file);
+                    } catch (err: unknown) {
+                      setOpenApiFileError("File parsing failed: " + (err instanceof Error ? err.message : "Invalid format"));
+                      setFormData({ ...formData, openapiSpec: undefined });
                     }
                   }}
                 />
@@ -937,7 +994,11 @@ export default function APICatalogDashboard() {
                   <div>
                     <dt className="text-gray-500 font-medium">Category</dt>
                     <dd className="mt-1">
-                      <Badge className={getCategoryColor(selectedCatalog.category)}>{selectedCatalog.category}</Badge>
+                      <Badge className={getCategoryColor(selectedCatalog.category)}>
+                        {typeof selectedCatalog.category === "string"
+                          ? selectedCatalog.category
+                          : selectedCatalog.category?.name || "Unknown"}
+                      </Badge>
                     </dd>
                   </div>
                   <div>
