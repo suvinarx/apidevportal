@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const catalogRoutes = require('./routes/catalogRoutes');
 const apiRoutes = require('./routes/apiRoutes');
+const categoryRoutes = require('./routes/categories');
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ mongoose.connect(process.env.MONGO_URL, {
 // Mount routes
 app.use('/api/catalogs', catalogRoutes);
 app.use('/api/apis', apiRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Default route
 app.get('/', (req, res) => res.send('API Catalog backend is running!'));

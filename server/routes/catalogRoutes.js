@@ -52,7 +52,7 @@ router.get('/search', async (req, res) => {
 // Get all catalogs
 router.get('/', async (req, res) => {
   try {
-    const catalogs = await Catalog.find();
+    const catalogs = await Catalog.find().populate('category');
     res.json(catalogs);
   } catch (err) {
     res.status(500).json({ error: err.message });

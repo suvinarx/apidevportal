@@ -5,7 +5,7 @@ const CatalogSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
   color: String,
-  category: { type: String, enum: ['order', 'org', 'inventory'], required: true }, // <-- new field
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
   visibility: { type: String, enum: ['public', 'private'], default: 'public' },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   accessRoles: [{ type: String, enum: ['admin', 'developer'] }], // Can add more roles
