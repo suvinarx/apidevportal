@@ -1016,13 +1016,6 @@ export default function APICatalogDashboard() {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500 font-medium">Color</dt>
-                    <dd className="mt-1 flex items-center gap-2">
-                      <div className="w-4 h-4 rounded border" style={{ backgroundColor: selectedCatalog.color }} />
-                      <span className="text-xs font-mono">{selectedCatalog.color}</span>
-                    </dd>
-                  </div>
-                  <div>
                     <dt className="text-gray-500 font-medium">Access Roles</dt>
                     <dd className="mt-2 flex flex-wrap gap-2">
                       {selectedCatalog.accessRoles.map((role) => (
