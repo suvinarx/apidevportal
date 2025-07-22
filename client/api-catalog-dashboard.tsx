@@ -126,7 +126,7 @@ const getStatusColor = (status?: string) => {
   if (!status) return "bg-gray-100 text-gray-800"
   switch (status.toLowerCase()) {
     case "active":
-      return "bg-green-100 text-green-800 hover:bg-green-50 transition-colors"
+      return "bg-blue-100 text-blue-800 hover:bg-blue-50 transition-colors"
     case "inactive":
       return "bg-red-100 text-red-800 text-xs hover:bg-red-50 transition-colors"
     default:
