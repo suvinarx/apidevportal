@@ -105,22 +105,24 @@ function FileSizeErrorModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
   );
 }
 
-
-const getCategoryColor = (category?: string | { _id: string; name: string }) => {
-  const categoryName = typeof category === "string" ? category : category?.name
-  if (!categoryName) return "bg-gray-100 text-gray-800 border-gray-300"
+const getCategoryColor = (
+  category?: string | { _id: string; name: string }
+) => {
+  const categoryName = typeof category === "string" ? category : category?.name;
+  if (!categoryName)
+    return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
 
   switch (categoryName.toLowerCase()) {
     case "order":
-      return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors"
+      return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
     case "org":
-      return "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-50 transition-colors"
+      return "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-50 transition-colors";
     case "inventory":
-      return "bg-slate-100 text-slate-800 border-slate-300"
+      return "bg-slate-100 text-slate-800 border-slate-300";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-300"
+      return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
   }
-}
+};
 
 const getStatusColor = (status?: string) => {
   if (!status) return "bg-gray-100 text-gray-800"
@@ -146,7 +148,7 @@ const getVisibilityColor = (visibility?: string) => {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function APICatalogDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -212,23 +214,23 @@ export default function APICatalogDashboard() {
     }
   }
 
- const loadCategories = async () => {
-  try {
-    const data: Category[] = await categoryApi.getAll();
-    const categoriesWithAll = [{ _id: "all", name: "All", createdAt: "", updatedAt: "" }, ...data] as CategoryWithIcon[];
-    setCategories(categoriesWithAll);
+  const loadCategories = async () => {
+    try {
+      const data: Category[] = await categoryApi.getAll();
+      const categoriesWithAll = [{ _id: "all", name: "All", createdAt: "", updatedAt: "" }, ...data] as CategoryWithIcon[];
+      setCategories(categoriesWithAll);
 
-    if (!formData.category && categoriesWithAll.length > 1) {
-      setFormData((prev) => ({ ...prev, category: categoriesWithAll[1]._id }));
+      if (!formData.category && categoriesWithAll.length > 1) {
+        setFormData((prev) => ({ ...prev, category: categoriesWithAll[1]._id }));
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load categories",
+        variant: "destructive",
+      });
     }
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to load categories",
-      variant: "destructive",
-    });
-  }
-};
+  };
 
 
   const filteredCatalogs = catalogs.filter((catalog) => {

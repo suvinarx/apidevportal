@@ -20,11 +20,12 @@ services:
       - mongo
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5000/api
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
     depends_on:
       - server
 
