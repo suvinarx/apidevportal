@@ -3,6 +3,7 @@ const router = express.Router();
 const Catalog = require('../models/Catalog');
 const Api = require('../models/Api');
 const yaml = require("js-yaml");
+const { default: mongoose } = require('mongoose');
 
 router.get('/search', async (req, res) => {
   try {
@@ -49,64 +50,61 @@ router.get('/search', async (req, res) => {
 });
 
 // Get all catalogs
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const { regions, businessTypes } = req.query;
+    const { region, businessType } = req.query;
 
     const matchStage = {};
 
-    // Parse and filter regions (if any)
-    if (regions) {
-      const regionIds = regions.split(',').map(id => new mongoose.Types.ObjectId(id.trim()));
-      matchStage.regions = { $in: regionIds };
+    // Handle region filter (can be string or array)
+    if (region) {
+      const regionIds = Array.isArray(region)
+        ? region.map((id) => new mongoose.Types.ObjectId(id))
+        : [new mongoose.Types.ObjectId(region)];
+      matchStage["regions"] = { $in: regionIds };
     }
 
-    // Parse and filter businessTypes (if any)
-    if (businessTypes) {
-      const businessTypeIds = businessTypes.split(',').map(id => new mongoose.Types.ObjectId(id.trim()));
-      matchStage.businessTypes = { $in: businessTypeIds };
+    // Handle businessType filter (can be string or array)
+    if (businessType) {
+      const businessTypeIds = Array.isArray(businessType)
+        ? businessType.map((id) => new mongoose.Types.ObjectId(id))
+        : [new mongoose.Types.ObjectId(businessType)];
+      matchStage["businessTypes"] = { $in: businessTypeIds };
     }
 
     const catalogs = await Catalog.aggregate([
       { $match: matchStage },
 
-      // Lookup region details
       {
         $lookup: {
-          from: 'regions',
-          localField: 'regions',
-          foreignField: '_id',
-          as: 'regionDetails'
-        }
+          from: "regions",
+          localField: "regions",
+          foreignField: "_id",
+          as: "regionDetails",
+        },
       },
-
-      // Lookup business type details
       {
         $lookup: {
-          from: 'businesstypes',
-          localField: 'businessTypes',
-          foreignField: '_id',
-          as: 'businessTypeDetails'
-        }
+          from: "businesstypes",
+          localField: "businessTypes",
+          foreignField: "_id",
+          as: "businessTypeDetails",
+        },
       },
-
-      // Lookup category if needed (optional)
       {
         $lookup: {
-          from: 'categories',
-          localField: 'category',
-          foreignField: '_id',
-          as: 'category'
-        }
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
       },
       {
         $unwind: {
-          path: '$category',
-          preserveNullAndEmptyArrays: true
-        }
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
       },
-
-      // Optional: Project fields you want to return
       {
         $project: {
           name: 1,
@@ -116,26 +114,19 @@ router.get('/', async (req, res) => {
           status: 1,
           tags: 1,
           openApiFileUrl: 1,
-          regionDetails: {
-            _id: 1,
-            name: 1,
-            code: 1
-          },
-          businessTypeDetails: {
-            _id: 1,
-            name: 1,
-            code: 1
-          }
-        }
-      }
+          regionDetails: { _id: 1, name: 1, code: 1 },
+          businessTypeDetails: { _id: 1, name: 1, code: 1 },
+        },
+      },
     ]);
 
     res.json(catalogs);
   } catch (err) {
-    console.error('Failed to fetch catalogs:', err);
+    console.error("Failed to fetch catalogs:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Create a catalog
 router.post('/', async (req, res) => {

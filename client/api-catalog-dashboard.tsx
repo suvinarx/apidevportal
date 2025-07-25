@@ -15,6 +15,9 @@ import {
   TagIcon,
   Loader2,
   AlertCircle,
+  LucideProps,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,10 +72,9 @@ import {
   type Category,
 } from "@/lib/api";
 import ApiWorkspace from "@/components/api-workspace";
-
+import { AnimatePresence, motion } from "framer-motion";
 // Category type
 import { ComponentType } from "react";
-import { LucideProps } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -220,9 +222,11 @@ export default function APICatalogDashboard() {
     name: "",
     description: "",
   });
-  const [regions, setRegions] = useState<{ _id: string; name: string }[]>([]);
+  const [regions, setRegions] = useState<
+    { _id: string; name: string; count: string }[]
+  >([]);
   const [businessTypes, setBusinessTypes] = useState<
-    { _id: string; name: string }[]
+    { _id: string; name: string; count: string }[]
   >([]);
 
   const fetchMetaData: () => Promise<void> = async () => {
@@ -245,6 +249,39 @@ export default function APICatalogDashboard() {
     fetchMetaData();
   }, []);
 
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>(
+    []
+  );
+  const [openDropdown, setOpenDropdown] = useState<
+    "business" | "region" | null
+  >(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleFilter = (arr: string[], value: string, setter: any) => {
+    setter(
+      arr.includes(value) ? arr.filter((id) => id !== value) : [...arr, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedRegions([]);
+    setSelectedBusinessTypes([]);
+  };
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form states
@@ -264,14 +301,20 @@ export default function APICatalogDashboard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCategories();
     loadCatalogs();
+  }, [selectedBusinessTypes, selectedRegions]);
+
+  useEffect(() => {
+    loadCategories();
   }, []);
 
   const loadCatalogs = async () => {
     try {
       setLoading(true);
-      const data = await catalogApi.getAll();
+      const data = await catalogApi.getAll({
+        regions: selectedRegions,
+        businessTypes: selectedBusinessTypes,
+      });
       setCatalogs(data);
     } catch (error) {
       toast({
@@ -707,112 +750,302 @@ export default function APICatalogDashboard() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCatalogs.map((catalog) => (
-                <Card
-                  key={catalog._id}
-                  className="group hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-1 border-gray-200 hover:border-emerald-200 bg-white cursor-pointer"
-                  onClick={() => handleViewDocumentation(catalog)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{
-                              backgroundColor: catalog.color || "#059669",
-                            }}
-                          />
-                          <CardTitle className="text-lg font-bold text-emerald-700 group-hover:text-emerald-800 transition-colors">
-                            {catalog.name}
-                          </CardTitle>
-                        </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={getCategoryColor(catalog.category)}>
-                            {typeof catalog.category === "string"
-                              ? categories.find(
-                                  (cat) => cat._id === catalog.category
-                                )?.name || catalog.category
-                              : catalog.category?.name || "Unknown"}
-                          </Badge>
-                          <Badge className={getStatusColor(catalog.status)}>
-                            {catalog.status}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleView(catalog);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(catalog);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(catalog);
-                          }}
-                          className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <CardDescription className="text-gray-600 mb-4 line-clamp-3">
-                      {catalog.description || "No description available"}
-                    </CardDescription>
-                    <div className="space-y-3">
-                      <Badge
-                        className={getVisibilityColor(catalog.visibility)}
-                        variant="outline"
+            <>
+              <div
+                className="flex flex-wrap items-center gap-4  py-4"
+                ref={dropdownRef}
+              >
+                {/* Business Type */}
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      setOpenDropdown(
+                        openDropdown === "business" ? null : "business"
+                      )
+                    }
+                    className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
+                  >
+                    Business Type
+                    {selectedBusinessTypes.length > 0 && (
+                      <span className="text-xs text-gray-500">
+                        ({selectedBusinessTypes.length})
+                      </span>
+                    )}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  <AnimatePresence>
+                    {openDropdown === "business" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
                       >
-                        {catalog.visibility}
-                      </Badge>
-                      <div className="flex flex-wrap gap-1">
-                        {catalog.tags.slice(0, 3).map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="outline"
-                            className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition-colors"
+                        {businessTypes.map((type) => (
+                          <label
+                            key={type._id}
+                            className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
                           >
-                            {tag}
-                          </Badge>
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedBusinessTypes.includes(
+                                  type._id
+                                )}
+                                onChange={() =>
+                                  toggleFilter(
+                                    selectedBusinessTypes,
+                                    type._id,
+                                    setSelectedBusinessTypes
+                                  )
+                                }
+                                className="mr-2 accent-emerald-600"
+                              />
+                              <span className="text-sm text-gray-700">
+                                {type.name}
+                              </span>
+                            </div>
+                            {typeof type.count === "number" && (
+                              <span className="text-xs text-gray-500">
+                                ({type.count})
+                              </span>
+                            )}
+                          </label>
                         ))}
-                        {catalog.tags.length > 3 && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-gray-500"
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Region Availability */}
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      setOpenDropdown(
+                        openDropdown === "region" ? null : "region"
+                      )
+                    }
+                    className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
+                  >
+                    Regional Availability
+                    {selectedRegions.length > 0 && (
+                      <span className="text-xs text-gray-500">
+                        ({selectedRegions.length})
+                      </span>
+                    )}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  <AnimatePresence>
+                    {openDropdown === "region" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
+                      >
+                        {regions.map((region) => (
+                          <label
+                            key={region._id}
+                            className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
                           >
-                            +{catalog.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedRegions.includes(region._id)}
+                                onChange={() =>
+                                  toggleFilter(
+                                    selectedRegions,
+                                    region._id,
+                                    setSelectedRegions
+                                  )
+                                }
+                                className="mr-2 accent-emerald-600"
+                              />
+                              <span className="text-sm text-gray-700">
+                                {region.name}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              ({region.count || 0})
+                            </span>
+                          </label>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="w-full">
+                  {/* Tags & Clear */}
+                  {(selectedRegions.length > 0 ||
+                    selectedBusinessTypes.length > 0) && (
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="font-medium text-gray-700">
+                        {selectedRegions.length + selectedBusinessTypes.length}{" "}
+                        results filtered by
+                      </span>
+                      {selectedRegions.map((rId) => {
+                        const region = regions.find((r) => r._id === rId);
+                        return (
+                          <span
+                            key={rId}
+                            className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                          >
+                            {region?.name}
+                            <X
+                              className="w-3 h-3 cursor-pointer"
+                              onClick={() =>
+                                setSelectedRegions(
+                                  selectedRegions.filter((id) => id !== rId)
+                                )
+                              }
+                            />
+                          </span>
+                        );
+                      })}
+                      {selectedBusinessTypes.map((bId) => {
+                        const type = businessTypes.find((b) => b._id === bId);
+                        return (
+                          <span
+                            key={bId}
+                            className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                          >
+                            {type?.name}
+                            <X
+                              className="w-3 h-3 cursor-pointer"
+                              onClick={() =>
+                                setSelectedBusinessTypes(
+                                  selectedBusinessTypes.filter(
+                                    (id) => id !== bId
+                                  )
+                                )
+                              }
+                            />
+                          </span>
+                        );
+                      })}
+                      <button
+                        onClick={clearFilters}
+                        className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 ml-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Clear all
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredCatalogs.map((catalog) => (
+                  <Card
+                    key={catalog._id}
+                    className="group hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-1 border-gray-200 hover:border-emerald-200 bg-white cursor-pointer"
+                    onClick={() => handleViewDocumentation(catalog)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{
+                                backgroundColor: catalog.color || "#059669",
+                              }}
+                            />
+                            <CardTitle className="text-lg font-bold text-emerald-700 group-hover:text-emerald-800 transition-colors">
+                              {catalog.name}
+                            </CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge
+                              className={getCategoryColor(catalog.category)}
+                            >
+                              {typeof catalog.category === "string"
+                                ? categories.find(
+                                    (cat) => cat._id === catalog.category
+                                  )?.name || catalog.category
+                                : catalog.category?.name || "Unknown"}
+                            </Badge>
+                            <Badge className={getStatusColor(catalog.status)}>
+                              {catalog.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleView(catalog);
+                            }}
+                            className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(catalog);
+                            }}
+                            className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(catalog);
+                            }}
+                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <CardDescription className="text-gray-600 mb-4 line-clamp-3">
+                        {catalog.description || "No description available"}
+                      </CardDescription>
+                      <div className="space-y-3">
+                        <Badge
+                          className={getVisibilityColor(catalog.visibility)}
+                          variant="outline"
+                        >
+                          {catalog.visibility}
+                        </Badge>
+                        <div className="flex flex-wrap gap-1">
+                          {catalog.tags.slice(0, 3).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition-colors"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {catalog.tags.length > 3 && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-gray-500"
+                            >
+                              +{catalog.tags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           )}
           {!loading && filteredCatalogs.length === 0 && (
             <div className="text-center py-12">

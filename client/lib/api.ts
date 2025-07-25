@@ -64,11 +64,21 @@ export interface CreateCatalogData {
 
 // -- Catalog API --
 export const catalogApi = {
-  getAll: async (): Promise<Catalog[]> => {
-    const res = await fetch(`${API_BASE_URL}/catalogs`);
-    if (!res.ok) throw new Error("Failed to fetch catalogs");
-    return res.json();
-  },
+  getAll: async (filters?: {
+  regions?: string[];
+  businessTypes?: string[];
+}): Promise<Catalog[]> => {
+  const params = new URLSearchParams();
+
+  filters?.regions?.forEach((id) => params.append("region", id));
+  filters?.businessTypes?.forEach((id) => params.append("businessType", id));
+
+  const query = params.toString();
+  const res = await fetch(`${API_BASE_URL}/catalogs${query ? `?${query}` : ""}`);
+
+  if (!res.ok) throw new Error("Failed to fetch catalogs");
+  return res.json();
+},
 
   getById: async (id: string): Promise<Catalog> => {
     const res = await fetch(`${API_BASE_URL}/catalogs/${id}`);

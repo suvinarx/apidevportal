@@ -21,9 +21,31 @@ router.post('/', async (req, res) => {
 // Get all regions
 router.get('/', async (req, res) => {
   try {
-    const regions = await Region.find();
-    res.json(regions);
+    const regionsWithCounts = await Region.aggregate([
+      {
+        $lookup: {
+          from: 'catalogs', // collection name of catalogs
+          localField: '_id',
+          foreignField: 'regions',
+          as: 'catalogs',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          code: 1,
+          count: { $size: '$catalogs' }, // count of linked catalogs
+        },
+      },
+      {
+        $sort: { name: 1 },
+      },
+    ]);
+
+    res.json(regionsWithCounts);
   } catch (err) {
+    console.error('Failed to fetch regions:', err);
     res.status(500).json({ error: err.message });
   }
 });

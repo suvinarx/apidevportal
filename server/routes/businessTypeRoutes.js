@@ -21,11 +21,32 @@ router.post('/', async (req, res) => {
 // Get all business types
 router.get('/', async (req, res) => {
   try {
-    const types = await BusinessType.find();
-    res.json(types);
+    const typesWithCounts = await BusinessType.aggregate([
+      {
+        $lookup: {
+          from: 'catalogs',               // join with catalogs collection
+          localField: '_id',
+          foreignField: 'businessTypes',
+          as: 'catalogs',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          code: 1,
+          count: { $size: '$catalogs' },  // count how many catalogs matched
+        },
+      },
+      { $sort: { name: 1 } }, // Optional: sort alphabetically
+    ]);
+
+    res.json(typesWithCounts);
   } catch (err) {
+    console.error('Failed to fetch business types:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
