@@ -56,6 +56,8 @@ export interface CreateCatalogData {
   accessRoles?: ("admin" | "developer")[];
   tags?: string[];
   openapiSpec?: any;
+  regions?: string[];
+  businessTypes?: string[];
 }
 
 // ---- API FUNCTIONS ----

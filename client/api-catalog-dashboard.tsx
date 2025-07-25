@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react";
 import {
   Search,
   Plus,
@@ -15,11 +15,17 @@ import {
   TagIcon,
   Loader2,
   AlertCircle,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,11 +33,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,24 +59,35 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useToast } from "@/hooks/use-toast"
-import { type Catalog, catalogApi, type CreateCatalogData, categoryApi, type Category } from "@/lib/api"
-import ApiWorkspace from "@/components/api-workspace"
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
+  type Catalog,
+  catalogApi,
+  type CreateCatalogData,
+  categoryApi,
+  type Category,
+} from "@/lib/api";
+import ApiWorkspace from "@/components/api-workspace";
 
 // Category type
-import { ComponentType } from "react"
-import { LucideProps } from "lucide-react"
+import { ComponentType } from "react";
+import { LucideProps } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./components/ui/popover";
 
 type CategoryWithIcon = Category & {
   icon?: ComponentType<LucideProps>;
-}
+};
 const defaultCategories = [
   { id: "all", name: "All", icon: Grid3X3 },
   { id: "order", name: "Order", icon: ShoppingCart },
   { id: "org", name: "Org", icon: Building },
   { id: "inventory", name: "Inventory", icon: Package },
-]
+];
 
 const RedocStandalone = ({ spec, options }: { spec: any; options: any }) => {
   return (
@@ -66,17 +95,25 @@ const RedocStandalone = ({ spec, options }: { spec: any; options: any }) => {
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">API Documentation</h2>
         <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 mb-4">OpenAPI Specification Preview</p>
+          <p className="text-sm text-gray-600 mb-4">
+            OpenAPI Specification Preview
+          </p>
           <pre className="text-xs overflow-auto max-h-96 bg-white p-4 rounded border">
             {JSON.stringify(spec, null, 2)}
           </pre>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-function FileSizeErrorModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function FileSizeErrorModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md rounded-2xl shadow-xl border border-red-200 bg-white animate-fade-in">
@@ -88,7 +125,8 @@ function FileSizeErrorModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
             File Too Large
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            The file you are trying to upload exceeds the 1MB size limit. Please select a smaller file.
+            The file you are trying to upload exceeds the 1MB size limit. Please
+            select a smaller file.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4">
@@ -125,58 +163,88 @@ const getCategoryColor = (
 };
 
 const getStatusColor = (status?: string) => {
-  if (!status) return "bg-gray-100 text-gray-800"
+  if (!status) return "bg-gray-100 text-gray-800";
   switch (status.toLowerCase()) {
     case "active":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-50 transition-colors"
+      return "bg-blue-100 text-blue-800 hover:bg-blue-50 transition-colors";
     case "inactive":
-      return "bg-red-100 text-red-800 text-xs hover:bg-red-50 transition-colors"
+      return "bg-red-100 text-red-800 text-xs hover:bg-red-50 transition-colors";
     default:
-      return "bg-gray-50 text-gray-800"
+      return "bg-gray-50 text-gray-800";
   }
-}
+};
 
 const getVisibilityColor = (visibility?: string) => {
-  if (!visibility) return "bg-gray-100 text-gray-800"
+  if (!visibility) return "bg-gray-100 text-gray-800";
   switch (visibility.toLowerCase()) {
     case "public":
-      return "bg-green-100 text-green-800"
+      return "bg-green-100 text-green-800";
     case "private":
-      return "bg-red-100 text-red-800"
+      return "bg-red-100 text-red-800";
     default:
-      return "bg-gray-100 text-gray-800"
+      return "bg-gray-100 text-gray-800";
   }
-}
+};
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function APICatalogDashboard() {
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false)
-  const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null)
-  const [catalogs, setCatalogs] = useState<Catalog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<"dashboard" | "workspace">("dashboard")
-  const [workspaceCatalogId, setWorkspaceCatalogId] = useState<string | null>(null)
-  const [openApiFile, setOpenApiFile] = useState<File | null>(null)
-  const [openApiFileError, setOpenApiFileError] = useState<string | null>(null)
-  const [dropdownResults, setDropdownResults] = useState<any[]>([])
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>()
-  const [docModalOpen, setDocModalOpen] = useState(false)
-  const [isFileSizeErrorModalOpen, setIsFileSizeErrorModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
+  const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
+  const [catalogs, setCatalogs] = useState<Catalog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentView, setCurrentView] = useState<"dashboard" | "workspace">(
+    "dashboard"
+  );
+  const [workspaceCatalogId, setWorkspaceCatalogId] = useState<string | null>(
+    null
+  );
+  const [openApiFile, setOpenApiFile] = useState<File | null>(null);
+  const [openApiFileError, setOpenApiFileError] = useState<string | null>(null);
+  const [dropdownResults, setDropdownResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>();
+  const [docModalOpen, setDocModalOpen] = useState(false);
+  const [isFileSizeErrorModalOpen, setIsFileSizeErrorModalOpen] =
+    useState(false);
   // Category management states
-  const [categories, setCategories] = useState<CategoryWithIcon[]>([])
-  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false)
+  const [categories, setCategories] = useState<CategoryWithIcon[]>([]);
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
-  })
+  });
+  const [regions, setRegions] = useState<{ _id: string; name: string }[]>([]);
+  const [businessTypes, setBusinessTypes] = useState<
+    { _id: string; name: string }[]
+  >([]);
+
+  const fetchMetaData: () => Promise<void> = async () => {
+    try {
+      const [regionRes, businessTypeRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/regions`),
+        fetch(`${API_BASE_URL}/business-types`),
+      ]);
+
+      const regionData = await regionRes.json();
+      const businessTypeData = await businessTypeRes.json();
+
+      setRegions(regionData);
+      setBusinessTypes(businessTypeData);
+    } catch (error) {
+      console.error("Failed to fetch metadata:", error);
+    }
+  };
+  useEffect(() => {
+    fetchMetaData();
+  }, []);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form states
@@ -189,39 +257,48 @@ export default function APICatalogDashboard() {
     status: "active",
     accessRoles: ["admin"],
     tags: [],
-  })
+    regions: [],
+    businessTypes: [],
+  });
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
-    loadCategories()
-    loadCatalogs()
-  }, [])
+    loadCategories();
+    loadCatalogs();
+  }, []);
 
   const loadCatalogs = async () => {
     try {
-      setLoading(true)
-      const data = await catalogApi.getAll()
-      setCatalogs(data)
+      setLoading(true);
+      const data = await catalogApi.getAll();
+      setCatalogs(data);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load catalogs. Please check if the backend is running.",
+        description:
+          "Failed to load catalogs. Please check if the backend is running.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadCategories = async () => {
     try {
       const data: Category[] = await categoryApi.getAll();
-      const categoriesWithAll = [{ _id: "all", name: "All", createdAt: "", updatedAt: "" }, ...data] as CategoryWithIcon[];
+      const categoriesWithAll = [
+        { _id: "all", name: "All", createdAt: "", updatedAt: "" },
+        ...data,
+      ] as CategoryWithIcon[];
       setCategories(categoriesWithAll);
 
       if (!formData.category && categoriesWithAll.length > 1) {
-        setFormData((prev) => ({ ...prev, category: categoriesWithAll[1]._id }));
+        setFormData((prev) => ({
+          ...prev,
+          category: categoriesWithAll[1]._id,
+        }));
       }
     } catch (error) {
       toast({
@@ -232,22 +309,26 @@ export default function APICatalogDashboard() {
     }
   };
 
-
   const filteredCatalogs = catalogs.filter((catalog) => {
     // Handle both ObjectId string and populated category object
-    const catalogCategoryId = typeof catalog.category === "string" ? catalog.category : catalog.category?._id
+    const catalogCategoryId =
+      typeof catalog.category === "string"
+        ? catalog.category
+        : catalog.category?._id;
 
-    const matchesCategory = selectedCategory === "all" || catalogCategoryId === selectedCategory
+    const matchesCategory =
+      selectedCategory === "all" || catalogCategoryId === selectedCategory;
     const matchesSearch =
       catalog.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       catalog.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      catalog.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesCategory && matchesSearch
-  })
-
+      catalog.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    return matchesCategory && matchesSearch;
+  });
 
   const handleEdit = (catalog: Catalog) => {
-    setSelectedCatalog(catalog)
+    setSelectedCatalog(catalog);
     setFormData({
       name: catalog.name,
       description: catalog.description || "",
@@ -257,46 +338,48 @@ export default function APICatalogDashboard() {
       status: catalog.status,
       accessRoles: catalog.accessRoles,
       tags: catalog.tags,
-    })
-    setIsEditModalOpen(true)
-  }
+    });
+    setIsEditModalOpen(true);
+  };
 
   const handleDelete = (catalog: Catalog) => {
-    setSelectedCatalog(catalog)
-    setIsDeleteDialogOpen(true)
-  }
+    setSelectedCatalog(catalog);
+    setIsDeleteDialogOpen(true);
+  };
 
   const handleView = (catalog: Catalog) => {
-    setSelectedCatalog(catalog)
-    setIsDetailDrawerOpen(true)
-  }
+    setSelectedCatalog(catalog);
+    setIsDetailDrawerOpen(true);
+  };
 
   const handleViewDocumentation = (catalog: Catalog) => {
-    setWorkspaceCatalogId(catalog._id)
-    setCurrentView("workspace")
-  }
+    setWorkspaceCatalogId(catalog._id);
+    setCurrentView("workspace");
+  };
 
   const confirmDelete = async () => {
     if (selectedCatalog) {
       try {
-        await catalogApi.delete(selectedCatalog._id)
-        setCatalogs(catalogs.filter((catalog) => catalog._id !== selectedCatalog._id))
+        await catalogApi.delete(selectedCatalog._id);
+        setCatalogs(
+          catalogs.filter((catalog) => catalog._id !== selectedCatalog._id)
+        );
         toast({
           title: "Success",
           description: "Catalog deleted successfully",
-        })
+        });
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to delete catalog",
           variant: "destructive",
-        })
+        });
       } finally {
-        setIsDeleteDialogOpen(false)
-        setSelectedCatalog(null)
+        setIsDeleteDialogOpen(false);
+        setSelectedCatalog(null);
       }
     }
-  }
+  };
 
   const handleSubmit = async (isEdit: boolean) => {
     try {
@@ -306,31 +389,36 @@ export default function APICatalogDashboard() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
-        })
-        if (!response.ok) throw new Error("Failed to import catalog from OpenAPI")
-        const { catalog } = await response.json()
-        setCatalogs([...catalogs, catalog])
-        setIsAddModalOpen(false)
+        });
+        if (!response.ok)
+          throw new Error("Failed to import catalog from OpenAPI");
+        const { catalog } = await response.json();
+        setCatalogs([...catalogs, catalog]);
+        setIsAddModalOpen(false);
         toast({
           title: "Success",
           description: "Catalog imported from OpenAPI file!",
-        })
+        });
       } else if (isEdit && selectedCatalog) {
-        const updated = await catalogApi.update(selectedCatalog._id, formData)
-        setCatalogs(catalogs.map((cat) => (cat._id === selectedCatalog._id ? updated : cat)))
-        setIsEditModalOpen(false)
+        const updated = await catalogApi.update(selectedCatalog._id, formData);
+        setCatalogs(
+          catalogs.map((cat) =>
+            cat._id === selectedCatalog._id ? updated : cat
+          )
+        );
+        setIsEditModalOpen(false);
         toast({
           title: "Success",
           description: "Catalog updated successfully",
-        })
+        });
       } else {
-        const newCatalog = await catalogApi.create(formData)
-        setCatalogs([...catalogs, newCatalog])
-        setIsAddModalOpen(false)
+        const newCatalog = await catalogApi.create(formData);
+        setCatalogs([...catalogs, newCatalog]);
+        setIsAddModalOpen(false);
         toast({
           title: "Success",
           description: "Catalog created successfully",
-        })
+        });
       }
       setFormData({
         name: "",
@@ -341,17 +429,19 @@ export default function APICatalogDashboard() {
         status: "active",
         accessRoles: ["admin"],
         tags: [],
-      })
-      setOpenApiFile(null)
-      setOpenApiFileError(null)
+      });
+      setOpenApiFile(null);
+      setOpenApiFileError(null);
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to ${isEdit ? "update" : formData.openapiSpec ? "import" : "create"} catalog`,
+        description: `Failed to ${
+          isEdit ? "update" : formData.openapiSpec ? "import" : "create"
+        } catalog`,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const [tagsInput, setTagsInput] = useState((formData.tags || []).join(", "));
 
@@ -374,65 +464,64 @@ export default function APICatalogDashboard() {
         title: "Error",
         description: "Category name is required",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-
     // Check if category already exists locally (as UI feedback only)
-    const categoryExists = categories.some((cat) => cat.name.toLowerCase() === categoryFormData.name.toLowerCase())
+    const categoryExists = categories.some(
+      (cat) => cat.name.toLowerCase() === categoryFormData.name.toLowerCase()
+    );
 
     if (categoryExists) {
       toast({
         title: "Error",
         description: "Category already exists",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     try {
       // POST to backend
-      const newCategory = await categoryApi.create(categoryFormData)
+      const newCategory = await categoryApi.create(categoryFormData);
 
       function toCategoryWithIcon(cat: Category): CategoryWithIcon {
         return {
           ...cat,
           icon: Package as any,
-        }
+        };
       }
 
-      setCategories([...categories, toCategoryWithIcon(newCategory)])
-
-
+      setCategories([...categories, toCategoryWithIcon(newCategory)]);
 
       // Reset form
-      setCategoryFormData({ name: "", description: "" })
-      setIsAddCategoryModalOpen(false)
+      setCategoryFormData({ name: "", description: "" });
+      setIsAddCategoryModalOpen(false);
 
       toast({
         title: "Success",
         description: "Category added successfully",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add category",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   if (currentView === "workspace" && workspaceCatalogId) {
     return (
       <ApiWorkspace
         catalogId={workspaceCatalogId}
         onBack={() => {
-          setCurrentView("dashboard")
-          setWorkspaceCatalogId(null)
+          setCurrentView("dashboard");
+          setWorkspaceCatalogId(null);
         }}
       />
-    )
+    );
   }
 
   return (
@@ -445,24 +534,31 @@ export default function APICatalogDashboard() {
         <nav className="p-4">
           <div className="space-y-2">
             {categories.map((category) => {
-              const Icon = category.icon
-              const isActive = selectedCategory === category._id
+              const Icon = category.icon;
+              const isActive = selectedCategory === category._id;
               return (
                 <button
                   key={category._id}
                   onClick={() => setSelectedCategory(category._id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${isActive
-                    ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                    isActive
+                      ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
                 >
-                  {Icon ? <Icon className={`w-5 h-5 ${isActive ? "text-emerald-600" : "text-gray-400"}`} /> : null}
+                  {Icon ? (
+                    <Icon
+                      className={`w-5 h-5 ${
+                        isActive ? "text-emerald-600" : "text-gray-400"
+                      }`}
+                    />
+                  ) : null}
                   <span className="font-medium">{category.name}</span>
                   {isActive && (
                     <div className="ml-auto w-1 h-6 bg-gradient-to-b from-emerald-400 to-yellow-400 rounded-full"></div>
                   )}
                 </button>
-              )
+              );
             })}
           </div>
         </nav>
@@ -474,8 +570,12 @@ export default function APICatalogDashboard() {
         <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900">API Developer Platform</h2>
-              {loading && <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />}
+              <h2 className="text-2xl font-bold text-gray-900">
+                API Developer Platform
+              </h2>
+              {loading && (
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+              )}
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -484,38 +584,38 @@ export default function APICatalogDashboard() {
                   placeholder="Search by name or path..."
                   value={searchQuery}
                   onChange={async (e) => {
-                    const value = e.target.value
-                    setSearchQuery(value)
+                    const value = e.target.value;
+                    setSearchQuery(value);
                     // Clear previous timeout
-                    if (searchTimeout) clearTimeout(searchTimeout)
+                    if (searchTimeout) clearTimeout(searchTimeout);
                     // Don't search if query is empty
                     if (!value.trim()) {
-                      setDropdownResults([])
-                      setShowDropdown(false)
-                      return
+                      setDropdownResults([]);
+                      setShowDropdown(false);
+                      return;
                     }
-                    setIsSearching(true)
-                    setShowDropdown(true)
+                    setIsSearching(true);
+                    setShowDropdown(true);
                     // Set new timeout with debounce
                     setSearchTimeout(
                       setTimeout(async () => {
                         try {
-                          const data = await catalogApi.search(value)
-                          console.log("Search results:", data) // Debugging
-                          setDropdownResults(data)
+                          const data = await catalogApi.search(value);
+                          console.log("Search results:", data); // Debugging
+                          setDropdownResults(data);
                         } catch (err) {
-                          console.error("Search error:", err)
-                          setDropdownResults([])
+                          console.error("Search error:", err);
+                          setDropdownResults([]);
                           toast({
                             title: "Search error",
                             description: "Failed to perform search",
                             variant: "destructive",
-                          })
+                          });
                         } finally {
-                          setIsSearching(false)
+                          setIsSearching(false);
                         }
-                      }, 300),
-                    ) // 300ms debounce delay
+                      }, 300)
+                    ); // 300ms debounce delay
                   }}
                   className="pl-10 w-80 bg-gray-50 border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
                 />
@@ -532,19 +632,25 @@ export default function APICatalogDashboard() {
                           key={`${item.type}-${item.id}`}
                           className="px-4 py-2 hover:bg-emerald-50 cursor-pointer"
                           onClick={() => {
-                            setShowDropdown(false)
-                            setSearchQuery("")
+                            setShowDropdown(false);
+                            setSearchQuery("");
                             if (item.type === "catalog") {
-                              const cat = catalogs.find((c) => c._id === item.id)
-                              if (cat) handleViewDocumentation(cat)
+                              const cat = catalogs.find(
+                                (c) => c._id === item.id
+                              );
+                              if (cat) handleViewDocumentation(cat);
                             } else if (item.type === "api" && item.catalogId) {
-                              const cat = catalogs.find((c) => c._id === item.catalogId)
+                              const cat = catalogs.find(
+                                (c) => c._id === item.catalogId
+                              );
                               if (cat) {
-                                handleViewDocumentation(cat)
+                                handleViewDocumentation(cat);
                                 setTimeout(() => {
-                                  const pathForHash = item.name.replace(/^\//, "").replace(/\//g, "~1")
-                                  window.location.hash = `#/paths/~1${pathForHash}`
-                                }, 500)
+                                  const pathForHash = item.name
+                                    .replace(/^\//, "")
+                                    .replace(/\//g, "~1");
+                                  window.location.hash = `#/paths/~1${pathForHash}`;
+                                }, 500);
                               }
                             }
                           }}
@@ -557,17 +663,25 @@ export default function APICatalogDashboard() {
                                     {item.method}
                                   </Badge>
                                 )}
-                                <span className="font-mono text-emerald-600">{item.name}</span>
+                                <span className="font-mono text-emerald-600">
+                                  {item.name}
+                                </span>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">{item.catalogName}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {item.catalogName}
+                              </div>
                             </>
                           ) : (
-                            <span className="font-semibold text-gray-800">{item.name}</span>
+                            <span className="font-semibold text-gray-800">
+                              {item.name}
+                            </span>
                           )}
                         </div>
                       ))
                     ) : searchQuery.trim() && !isSearching ? (
-                      <div className="px-4 py-2 text-gray-500">No results found</div>
+                      <div className="px-4 py-2 text-gray-500">
+                        No results found
+                      </div>
                     ) : null}
                   </div>
                 )}
@@ -606,7 +720,9 @@ export default function APICatalogDashboard() {
                         <div className="flex items-center gap-2 mb-2">
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: catalog.color || "#059669" }}
+                            style={{
+                              backgroundColor: catalog.color || "#059669",
+                            }}
                           />
                           <CardTitle className="text-lg font-bold text-emerald-700 group-hover:text-emerald-800 transition-colors">
                             {catalog.name}
@@ -615,10 +731,14 @@ export default function APICatalogDashboard() {
                         <div className="flex items-center gap-2 mt-2">
                           <Badge className={getCategoryColor(catalog.category)}>
                             {typeof catalog.category === "string"
-                              ? categories.find((cat) => cat._id === catalog.category)?.name || catalog.category
+                              ? categories.find(
+                                  (cat) => cat._id === catalog.category
+                                )?.name || catalog.category
                               : catalog.category?.name || "Unknown"}
                           </Badge>
-                          <Badge className={getStatusColor(catalog.status)}>{catalog.status}</Badge>
+                          <Badge className={getStatusColor(catalog.status)}>
+                            {catalog.status}
+                          </Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -626,8 +746,8 @@ export default function APICatalogDashboard() {
                           variant="ghost"
                           size="sm"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleView(catalog)
+                            e.stopPropagation();
+                            handleView(catalog);
                           }}
                           className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
                         >
@@ -637,8 +757,8 @@ export default function APICatalogDashboard() {
                           variant="ghost"
                           size="sm"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleEdit(catalog)
+                            e.stopPropagation();
+                            handleEdit(catalog);
                           }}
                           className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
                         >
@@ -648,8 +768,8 @@ export default function APICatalogDashboard() {
                           variant="ghost"
                           size="sm"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            handleDelete(catalog)
+                            e.stopPropagation();
+                            handleDelete(catalog);
                           }}
                           className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                         >
@@ -663,7 +783,10 @@ export default function APICatalogDashboard() {
                       {catalog.description || "No description available"}
                     </CardDescription>
                     <div className="space-y-3">
-                      <Badge className={getVisibilityColor(catalog.visibility)} variant="outline">
+                      <Badge
+                        className={getVisibilityColor(catalog.visibility)}
+                        variant="outline"
+                      >
                         {catalog.visibility}
                       </Badge>
                       <div className="flex flex-wrap gap-1">
@@ -677,7 +800,10 @@ export default function APICatalogDashboard() {
                           </Badge>
                         ))}
                         {catalog.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs text-gray-500">
+                          <Badge
+                            variant="outline"
+                            className="text-xs text-gray-500"
+                          >
                             +{catalog.tags.length - 3}
                           </Badge>
                         )}
@@ -691,8 +817,12 @@ export default function APICatalogDashboard() {
           {!loading && filteredCatalogs.length === 0 && (
             <div className="text-center py-12">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No APIs found</h3>
-              <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No APIs found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your search or filter criteria.
+              </p>
             </div>
           )}
         </main>
@@ -707,9 +837,9 @@ export default function APICatalogDashboard() {
         open={isAddModalOpen || isEditModalOpen}
         onOpenChange={(open) => {
           if (!open) {
-            setIsAddModalOpen(false)
-            setIsEditModalOpen(false)
-            setSelectedCatalog(null)
+            setIsAddModalOpen(false);
+            setIsEditModalOpen(false);
+            setSelectedCatalog(null);
           }
         }}
       >
@@ -719,7 +849,9 @@ export default function APICatalogDashboard() {
               {isEditModalOpen ? "Edit API Catalog" : "Add New API"}
             </DialogTitle>
             <DialogDescription>
-              {isEditModalOpen ? "Update the catalog details" : "Create a new API catalog with all necessary details."}
+              {isEditModalOpen
+                ? "Update the catalog details"
+                : "Create a new API catalog with all necessary details."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
@@ -729,7 +861,9 @@ export default function APICatalogDashboard() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="Enter catalog name"
                 />
               </div>
@@ -739,7 +873,9 @@ export default function APICatalogDashboard() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Describe what this catalog contains..."
                 rows={3}
               />
@@ -749,7 +885,9 @@ export default function APICatalogDashboard() {
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value: any) => setFormData({ ...formData, category: value })}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, category: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -776,11 +914,111 @@ export default function APICatalogDashboard() {
                   </SelectContent>
                 </Select>
               </div>
+              {/* Region Availability */}
+              <div className="space-y-2">
+                <Label>Region Availability</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal truncate"
+                    >
+                      {formData.regions?.length
+                        ? regions
+                            .filter((r) => formData.regions?.includes(r._id))
+                            .map((r) => r.name)
+                            .join(", ")
+                        : "Select regions"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                    {regions.map((region) => (
+                      <div
+                        key={region._id}
+                        className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            regions: prev.regions?.includes(region._id)
+                              ? prev.regions.filter((id) => id !== region._id)
+                              : [...(prev.regions || []), region._id],
+                          }));
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.regions?.includes(region._id)}
+                          readOnly
+                          className="accent-emerald-600 mr-2"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {region.name}
+                        </span>
+                      </div>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Business Type */}
+              <div className="space-y-2">
+                <Label>Business Type</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal truncate"
+                    >
+                      {formData.businessTypes?.length
+                        ? businessTypes
+                            .filter((b) =>
+                              formData.businessTypes?.includes(b._id)
+                            )
+                            .map((b) => b.name)
+                            .join(", ")
+                        : "Select business types"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                    {businessTypes.map((type) => (
+                      <div
+                        key={type._id}
+                        className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            businessTypes: prev.businessTypes?.includes(
+                              type._id
+                            )
+                              ? prev.businessTypes.filter(
+                                  (id) => id !== type._id
+                                )
+                              : [...(prev.businessTypes || []), type._id],
+                          }));
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.businessTypes?.includes(type._id)}
+                          readOnly
+                          className="accent-emerald-600 mr-2"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {type.name}
+                        </span>
+                      </div>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="visibility">Visibility</Label>
                 <Select
                   value={formData.visibility}
-                  onValueChange={(value: any) => setFormData({ ...formData, visibility: value })}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, visibility: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select visibility" />
@@ -795,7 +1033,9 @@ export default function APICatalogDashboard() {
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                  onValueChange={(value: any) =>
+                    setFormData({ ...formData, status: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -820,11 +1060,16 @@ export default function APICatalogDashboard() {
             <div className="space-y-2">
               <Label htmlFor="openapi">Import OpenAPI File (optional)</Label>
               <div
-                className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${openApiFileError ? "border-red-400 bg-red-50" : "border-emerald-200 bg-emerald-50/60"}      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
+                className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${
+                  openApiFileError
+                    ? "border-red-400 bg-red-50"
+                    : "border-emerald-200 bg-emerald-50/60"
+                }      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
                 tabIndex={0}
                 onClick={() => document.getElementById("openapi")?.click()}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") document.getElementById("openapi")?.click()
+                  if (e.key === "Enter" || e.key === " ")
+                    document.getElementById("openapi")?.click();
                 }}
                 style={{ minHeight: "90px" }}
               >
@@ -859,7 +1104,9 @@ export default function APICatalogDashboard() {
 
                     const ext = file.name.split(".").pop()?.toLowerCase();
                     if (!["json", "yml", "yaml"].includes(ext || "")) {
-                      setOpenApiFileError("Only .json, .yml, and .yaml files are supported.");
+                      setOpenApiFileError(
+                        "Only .json, .yml, and .yaml files are supported."
+                      );
                       setFormData({ ...formData, openapiSpec: undefined });
                       return;
                     }
@@ -868,11 +1115,19 @@ export default function APICatalogDashboard() {
                       let openapiSpec;
                       const text = await file.text();
                       if (ext === "json") openapiSpec = JSON.parse(text);
-                      else openapiSpec = (await import("js-yaml")).default.load(text);
+                      else
+                        openapiSpec = (await import("js-yaml")).default.load(
+                          text
+                        );
                       setFormData({ ...formData, openapiSpec });
                       setOpenApiFile(file);
                     } catch (err: unknown) {
-                      setOpenApiFileError("File parsing failed: " + (err instanceof Error ? err.message : "Invalid format"));
+                      setOpenApiFileError(
+                        "File parsing failed: " +
+                          (err instanceof Error
+                            ? err.message
+                            : "Invalid format")
+                      );
                       setFormData({ ...formData, openapiSpec: undefined });
                     }
                   }}
@@ -895,7 +1150,10 @@ export default function APICatalogDashboard() {
                     Drag &amp; drop your OpenAPI/Swagger file here
                   </span>
                   <span className="block text-xs text-gray-600 mt-1">
-                    or <span className="text-emerald-600 underline">click to choose file</span>
+                    or{" "}
+                    <span className="text-emerald-600 underline">
+                      click to choose file
+                    </span>
                     <br />
                     <span className="text-gray-500">(.json, .yaml, .yml)</span>
                   </span>
@@ -904,7 +1162,11 @@ export default function APICatalogDashboard() {
                       Attached: <b>{openApiFile.name}</b>
                     </div>
                   )}
-                  {openApiFileError && <div className="text-xs text-red-600 pt-2">{openApiFileError}</div>}
+                  {openApiFileError && (
+                    <div className="text-xs text-red-600 pt-2">
+                      {openApiFileError}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -913,13 +1175,16 @@ export default function APICatalogDashboard() {
             <Button
               variant="outline"
               onClick={() => {
-                setIsAddModalOpen(false)
-                setIsEditModalOpen(false)
+                setIsAddModalOpen(false);
+                setIsEditModalOpen(false);
               }}
             >
               Cancel
             </Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => handleSubmit(isEditModalOpen)}>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => handleSubmit(isEditModalOpen)}
+            >
               {isEditModalOpen ? "Update Catalog" : "Create New API"}
             </Button>
           </DialogFooter>
@@ -927,11 +1192,18 @@ export default function APICatalogDashboard() {
       </Dialog>
 
       {/* Add Category Modal */}
-      <Dialog open={isAddCategoryModalOpen} onOpenChange={setIsAddCategoryModalOpen}>
+      <Dialog
+        open={isAddCategoryModalOpen}
+        onOpenChange={setIsAddCategoryModalOpen}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-emerald-700">Add New Category</DialogTitle>
-            <DialogDescription>Create a new category for organizing your API catalogs.</DialogDescription>
+            <DialogTitle className="text-emerald-700">
+              Add New Category
+            </DialogTitle>
+            <DialogDescription>
+              Create a new category for organizing your API catalogs.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
@@ -939,7 +1211,12 @@ export default function APICatalogDashboard() {
               <Input
                 id="categoryName"
                 value={categoryFormData.name}
-                onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                onChange={(e) =>
+                  setCategoryFormData({
+                    ...categoryFormData,
+                    name: e.target.value,
+                  })
+                }
                 placeholder="Enter category name"
               />
             </div>
@@ -948,7 +1225,12 @@ export default function APICatalogDashboard() {
               <Textarea
                 id="categoryDescription"
                 value={categoryFormData.description}
-                onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
+                onChange={(e) =>
+                  setCategoryFormData({
+                    ...categoryFormData,
+                    description: e.target.value,
+                  })
+                }
                 placeholder="Describe this category..."
                 rows={3}
               />
@@ -958,13 +1240,16 @@ export default function APICatalogDashboard() {
             <Button
               variant="outline"
               onClick={() => {
-                setIsAddCategoryModalOpen(false)
-                setCategoryFormData({ name: "", description: "" })
+                setIsAddCategoryModalOpen(false);
+                setCategoryFormData({ name: "", description: "" });
               }}
             >
               Cancel
             </Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleAddCategory}>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAddCategory}
+            >
               Add Category
             </Button>
           </DialogFooter>
@@ -996,7 +1281,9 @@ export default function APICatalogDashboard() {
                   <div>
                     <dt className="text-gray-500 font-medium">Category</dt>
                     <dd className="mt-1">
-                      <Badge className={getCategoryColor(selectedCatalog.category)}>
+                      <Badge
+                        className={getCategoryColor(selectedCatalog.category)}
+                      >
                         {typeof selectedCatalog.category === "string"
                           ? selectedCatalog.category
                           : selectedCatalog.category?.name || "Unknown"}
@@ -1006,13 +1293,19 @@ export default function APICatalogDashboard() {
                   <div>
                     <dt className="text-gray-500 font-medium">Status</dt>
                     <dd className="mt-1">
-                      <Badge className={getStatusColor(selectedCatalog.status)}>{selectedCatalog.status}</Badge>
+                      <Badge className={getStatusColor(selectedCatalog.status)}>
+                        {selectedCatalog.status}
+                      </Badge>
                     </dd>
                   </div>
                   <div>
                     <dt className="text-gray-500 font-medium">Visibility</dt>
                     <dd className="mt-1">
-                      <Badge className={getVisibilityColor(selectedCatalog.visibility)}>
+                      <Badge
+                        className={getVisibilityColor(
+                          selectedCatalog.visibility
+                        )}
+                      >
                         {selectedCatalog.visibility}
                       </Badge>
                     </dd>
@@ -1020,8 +1313,12 @@ export default function APICatalogDashboard() {
                   <div>
                     <dt className="text-gray-500 font-medium">Access Roles</dt>
                     <dd className="mt-2 flex flex-wrap gap-2">
-                      {selectedCatalog.accessRoles.map((role) => (
-                        <Badge key={role} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {selectedCatalog.accessRoles?.map((role) => (
+                        <Badge
+                          key={role}
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
                           {role}
                         </Badge>
                       ))}
@@ -1030,7 +1327,9 @@ export default function APICatalogDashboard() {
                   <div>
                     <dt className="text-gray-500 font-medium">Tags</dt>
                     <dd className="mt-2 flex flex-wrap gap-2">
-                      {selectedCatalog.tags.length === 0 && <span className="text-gray-400">—</span>}
+                      {selectedCatalog.tags.length === 0 && (
+                        <span className="text-gray-400">—</span>
+                      )}
                       {selectedCatalog.tags.map((tag) => (
                         <Badge
                           key={tag}
@@ -1045,11 +1344,15 @@ export default function APICatalogDashboard() {
                   </div>
                   <div>
                     <dt className="text-gray-500 font-medium">Created</dt>
-                    <dd className="mt-1">{new Date(selectedCatalog.createdAt).toLocaleString()}</dd>
+                    <dd className="mt-1">
+                      {new Date(selectedCatalog.createdAt).toLocaleString()}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-gray-500 font-medium">Last Updated</dt>
-                    <dd className="mt-1">{new Date(selectedCatalog.updatedAt).toLocaleString()}</dd>
+                    <dd className="mt-1">
+                      {new Date(selectedCatalog.updatedAt).toLocaleString()}
+                    </dd>
                   </div>
                 </dl>
                 {/* Divider */}
@@ -1058,8 +1361,8 @@ export default function APICatalogDashboard() {
                     <Button
                       className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                       onClick={() => {
-                        setIsDetailDrawerOpen(false)
-                        handleViewDocumentation(selectedCatalog)
+                        setIsDetailDrawerOpen(false);
+                        handleViewDocumentation(selectedCatalog);
                       }}
                       disabled={!selectedCatalog.openapiSpec}
                     >
@@ -1070,8 +1373,8 @@ export default function APICatalogDashboard() {
                       variant="outline"
                       className="flex-1 bg-transparent"
                       onClick={() => {
-                        setIsDetailDrawerOpen(false)
-                        handleEdit(selectedCatalog)
+                        setIsDetailDrawerOpen(false);
+                        handleEdit(selectedCatalog);
                       }}
                     >
                       <Edit className="w-4 h-4 mr-2" />
@@ -1082,14 +1385,23 @@ export default function APICatalogDashboard() {
                 {/* Inline Doc Preview */}
                 {selectedCatalog.openapiSpec && (
                   <div className="mt-6">
-                    <div className="mb-2 font-semibold text-gray-800 text-lg">Quick API Doc Preview</div>
+                    <div className="mb-2 font-semibold text-gray-800 text-lg">
+                      Quick API Doc Preview
+                    </div>
                     <div className="border rounded bg-gray-50">
                       <RedocStandalone
                         spec={selectedCatalog.openapiSpec}
                         options={{
                           theme: {
-                            colors: { primary: { main: selectedCatalog?.color || "#059669" } },
-                            typography: { fontSize: "14px", fontFamily: "inherit" },
+                            colors: {
+                              primary: {
+                                main: selectedCatalog?.color || "#059669",
+                              },
+                            },
+                            typography: {
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                            },
                           },
                           hideDownloadButton: true,
                           nativeScrollbars: true,
@@ -1109,23 +1421,29 @@ export default function APICatalogDashboard() {
       </Sheet>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Catalog</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedCatalog?.name}"? This action cannot be undone and will also
-              delete all associated APIs.
+              Are you sure you want to delete "{selectedCatalog?.name}"? This
+              action cannot be undone and will also delete all associated APIs.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
