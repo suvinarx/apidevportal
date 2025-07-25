@@ -48,13 +48,91 @@ router.get('/search', async (req, res) => {
   }
 });
 
-
 // Get all catalogs
 router.get('/', async (req, res) => {
   try {
-    const catalogs = await Catalog.find().populate('category');
+    const { regions, businessTypes } = req.query;
+
+    const matchStage = {};
+
+    // Parse and filter regions (if any)
+    if (regions) {
+      const regionIds = regions.split(',').map(id => new mongoose.Types.ObjectId(id.trim()));
+      matchStage.regions = { $in: regionIds };
+    }
+
+    // Parse and filter businessTypes (if any)
+    if (businessTypes) {
+      const businessTypeIds = businessTypes.split(',').map(id => new mongoose.Types.ObjectId(id.trim()));
+      matchStage.businessTypes = { $in: businessTypeIds };
+    }
+
+    const catalogs = await Catalog.aggregate([
+      { $match: matchStage },
+
+      // Lookup region details
+      {
+        $lookup: {
+          from: 'regions',
+          localField: 'regions',
+          foreignField: '_id',
+          as: 'regionDetails'
+        }
+      },
+
+      // Lookup business type details
+      {
+        $lookup: {
+          from: 'businesstypes',
+          localField: 'businessTypes',
+          foreignField: '_id',
+          as: 'businessTypeDetails'
+        }
+      },
+
+      // Lookup category if needed (optional)
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'category'
+        }
+      },
+      {
+        $unwind: {
+          path: '$category',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      // Optional: Project fields you want to return
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          category: 1,
+          visibility: 1,
+          status: 1,
+          tags: 1,
+          openApiFileUrl: 1,
+          regionDetails: {
+            _id: 1,
+            name: 1,
+            code: 1
+          },
+          businessTypeDetails: {
+            _id: 1,
+            name: 1,
+            code: 1
+          }
+        }
+      }
+    ]);
+
     res.json(catalogs);
   } catch (err) {
+    console.error('Failed to fetch catalogs:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -62,8 +140,8 @@ router.get('/', async (req, res) => {
 // Create a catalog
 router.post('/', async (req, res) => {
   try {
-    const { name, description, color, category } = req.body;
-    const catalog = new Catalog({ name, description, color, category });
+    const { name, description, color, category, businessTypes, regions } = req.body;
+    const catalog = new Catalog({ name, description, color, category, businessTypes, regions });
     await catalog.save();
     res.status(201).json(catalog);
   } catch (err) {
@@ -111,6 +189,8 @@ router.put('/:catalogId', async (req, res) => {
       description,
       color,
       category,
+      businessTypes,
+      regions,
       visibility,
       status,
       accessRoles,
@@ -124,6 +204,8 @@ router.put('/:catalogId', async (req, res) => {
         description,
         color,
         category,
+        businessTypes,
+        regions,
         visibility,
         status,
         accessRoles,
