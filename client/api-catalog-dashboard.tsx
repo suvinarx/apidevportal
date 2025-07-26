@@ -146,47 +146,49 @@ function FileSizeErrorModal({
     </Dialog>
   );
 }
-
+// Helper functions (keeping original logic)
 const getCategoryColor = (
   category?: string | { _id: string; name: string }
 ) => {
   const categoryName = typeof category === "string" ? category : category?.name;
   if (!categoryName)
-    return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
+    return "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-50 transition-colors";
 
   switch (categoryName.toLowerCase()) {
     case "order":
-      return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
+      return "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-50 transition-colors";
     case "org":
-      return "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-50 transition-colors";
+      return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/5 transition-colors";
     case "inventory":
-      return "bg-slate-100 text-slate-800 border-slate-300";
+      return "bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-50 transition-colors";
     default:
-      return "bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-50 transition-colors";
+      return "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-50 transition-colors";
   }
 };
 
 const getStatusColor = (status?: string) => {
-  if (!status) return "bg-gray-100 text-gray-800";
+  if (!status) return "bg-gray-100 text-gray-800 border-gray-200";
+
   switch (status.toLowerCase()) {
     case "active":
-      return "bg-blue-100 text-blue-800 hover:bg-blue-50 transition-colors";
+      return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-50 transition-colors";
     case "inactive":
-      return "bg-red-100 text-red-800 text-xs hover:bg-red-50 transition-colors";
+      return "bg-red-100 text-red-800 border-red-200 hover:bg-red-50 transition-colors";
     default:
-      return "bg-gray-50 text-gray-800";
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 };
 
 const getVisibilityColor = (visibility?: string) => {
-  if (!visibility) return "bg-gray-100 text-gray-800";
+  if (!visibility) return "bg-gray-100 text-gray-800 border-gray-200";
+
   switch (visibility.toLowerCase()) {
     case "public":
-      return "bg-green-100 text-green-800";
+      return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/5 transition-colors";
     case "private":
-      return "bg-red-100 text-red-800";
+      return "bg-red-100 text-red-800 border-red-200 hover:bg-red-50 transition-colors";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 };
 
@@ -863,26 +865,28 @@ export default function APICatalogDashboard() {
                     {filteredCatalogs.map((catalog) => (
                       <Card
                         key={catalog._id}
-                        className="group  transition-all duration-700 hover:-translate-y-2 border-gray-200 hover:border-emerald-200 bg-white cursor-pointer"
+                        className="group transition-all duration-700 hover:-translate-y-2 border-gray-200 hover:border-primary/30 bg-white cursor-pointer shadow-sm hover:shadow-xl"
                         onClick={() => handleViewDocumentation(catalog)}
                       >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
+                        <CardHeader className="pb-4 space-y-0">
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center gap-3 mb-3">
                                 <div
-                                  className="w-3 h-3 rounded-full"
+                                  className="w-2.5 h-2.5 rounded-full shadow-sm"
                                   style={{
                                     backgroundColor: catalog.color || "#059669",
                                   }}
                                 />
-                                <CardTitle className="text-lg font-bold text-primary transition-colors">
+                                <CardTitle className="text-xl font-semibold text-gray-900 leading-tight">
                                   {catalog.name}
                                 </CardTitle>
                               </div>
-                              <div className="flex items-center gap-2 mt-2">
+                              <div className="flex items-center gap-2">
                                 <Badge
-                                  className={getCategoryColor(catalog.category)}
+                                  className={`${getCategoryColor(
+                                    catalog.category
+                                  )} text-xs font-medium px-2.5 py-1`}
                                 >
                                   {typeof catalog.category === "string"
                                     ? categories.find(
@@ -891,13 +895,15 @@ export default function APICatalogDashboard() {
                                     : catalog.category?.name || "Unknown"}
                                 </Badge>
                                 <Badge
-                                  className={getStatusColor(catalog.status)}
+                                  className={`${getStatusColor(
+                                    catalog.status
+                                  )} text-xs font-medium px-2.5 py-1`}
                                 >
                                   {catalog.status}
                                 </Badge>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -905,7 +911,7 @@ export default function APICatalogDashboard() {
                                   e.stopPropagation();
                                   handleView(catalog);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
+                                className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -916,7 +922,7 @@ export default function APICatalogDashboard() {
                                   e.stopPropagation();
                                   handleEdit(catalog);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                                className="h-8 w-8 p-0 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors"
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -927,30 +933,37 @@ export default function APICatalogDashboard() {
                                   e.stopPropagation();
                                   handleDelete(catalog);
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </CardHeader>
-                        <CardContent className="pt-0">
-                          <CardDescription className="text-gray-600 mb-4 line-clamp-3">
+
+                        <CardContent className="pt-0 space-y-4">
+                          <CardDescription className="text-gray-600 text-sm leading-relaxed line-clamp-3">
                             {catalog.description || "No description available"}
                           </CardDescription>
-                          <div className="space-y-3">
+
+                          <div className="flex items-center justify-between">
                             <Badge
-                              className={getVisibilityColor(catalog.visibility)}
+                              className={`${getVisibilityColor(
+                                catalog.visibility
+                              )} text-xs font-medium px-3 py-1.5 rounded-full`}
                               variant="outline"
                             >
                               {catalog.visibility}
                             </Badge>
-                            <div className="flex flex-wrap gap-1">
+                          </div>
+
+                          <div className="pt-2 border-t border-gray-100">
+                            <div className="flex flex-wrap gap-1.5">
                               {catalog.tags.slice(0, 3).map((tag) => (
                                 <Badge
                                   key={tag}
                                   variant="outline"
-                                  className="text-xs bg-gray-50 text-gray-500  transition-colors"
+                                  className="text-xs bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 transition-colors px-2 py-0.5 rounded-md font-normal"
                                 >
                                   {tag}
                                 </Badge>
@@ -958,7 +971,7 @@ export default function APICatalogDashboard() {
                               {catalog.tags.length > 3 && (
                                 <Badge
                                   variant="outline"
-                                  className="text-xs text-gray-500"
+                                  className="text-xs text-gray-500 border-gray-200 px-2 py-0.5 rounded-md font-normal"
                                 >
                                   +{catalog.tags.length - 3}
                                 </Badge>
