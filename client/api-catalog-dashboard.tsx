@@ -1103,7 +1103,7 @@ export default function APICatalogDashboard() {
                             : "Select regions"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                      <PopoverContent className="w-[190px] max-h-64 overflow-y-auto p-2">
                         {regions.map((region) => (
                           <div
                             key={region._id}
@@ -1153,7 +1153,7 @@ export default function APICatalogDashboard() {
                             : "Select business types"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                      <PopoverContent className="w-[190px] max-h-64 overflow-y-auto p-2">
                         {businessTypes.map((type) => (
                           <div
                             key={type._id}
