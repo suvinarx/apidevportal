@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'name is required' });
     }
 
-    const businessType = new BusinessType({ name, code });
+    const businessType = new BusinessType({ name });
     await businessType.save();
     res.status(201).json(businessType);
   } catch (err) {
