@@ -80,6 +80,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "./components/ui/popover";
+import DashboardHeader from "./components/common/Header";
+import Hero from "./components/Hero";
 
 type CategoryWithIcon = Category & {
   icon?: ComponentType<LucideProps>;
@@ -568,1115 +570,1061 @@ export default function APICatalogDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-emerald-100 shadow-sm">
-        <div className="px-6 py-6 border-b border-gray-100">
-          <h1 className="text-xl font-bold text-emerald-700">API Platform</h1>
-        </div>
-        <nav className="p-4">
-          <div className="space-y-2">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category._id;
-              return (
-                <button
-                  key={category._id}
-                  onClick={() => setSelectedCategory(category._id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                    isActive
-                      ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  {Icon ? (
-                    <Icon
-                      className={`w-5 h-5 ${
-                        isActive ? "text-emerald-600" : "text-gray-400"
-                      }`}
-                    />
-                  ) : null}
-                  <span className="font-medium">{category.name}</span>
-                  {isActive && (
-                    <div className="ml-auto w-1 h-6 bg-gradient-to-b from-emerald-400 to-yellow-400 rounded-full"></div>
-                  )}
-                </button>
-              );
-            })}
+    <>
+      <DashboardHeader />
+      // In APICatalogDashboard component, replace the Hero component with:
+      <Hero
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        catalogs={catalogs}
+        handleViewDocumentation={handleViewDocumentation}
+        toast={toast}
+        dropdownResults={dropdownResults}
+        setDropdownResults={setDropdownResults}
+        showDropdown={showDropdown}
+        setShowDropdown={setShowDropdown}
+        isSearching={isSearching}
+        setIsSearching={setIsSearching}
+        searchTimeout={searchTimeout}
+        setSearchTimeout={setSearchTimeout}
+      />
+      <div className="max-w-[1550px] mx-auto px-4 py-8 ">
+        {/* Title */}
+        <div className="flex">
+          <div className="w-64"></div>
+          <div className="px-6 py-6 bg-white">
+            <h1 className="text-4xl font-bold text-gray-900">
+              Explore Our API
+            </h1>
+            <p className="mt-2 text-gray-600 text-base">
+              Browse powerful APIs tailored to your business needs. Use filters
+              to quickly narrow down the best-fit solutions.
+            </p>
           </div>
-        </nav>
-      </div>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                API Developer Platform
-              </h2>
-              {loading && (
-                <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
-              )}
+        <div className="flex min-h-screen ">
+          {/* Sidebar */}
+          <div className="w-64 bg-white ">
+            <div className="sticky top-[160px]">
+              <div className="px-6 py-6">
+                <h1 className="text-xl font-bold text-primary">Capability</h1>
+              </div>
+              <nav className="p-4">
+                <div className="space-y-2">
+                  {categories.map((category) => {
+                    const Icon = category.icon;
+                    const isActive = selectedCategory === category._id;
+                    return (
+                      <button
+                        key={category._id}
+                        onClick={() => setSelectedCategory(category._id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                          isActive
+                            ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        {Icon ? (
+                          <Icon
+                            className={`w-5 h-5 ${
+                              isActive ? "text-emerald-600" : "text-gray-400"
+                            }`}
+                          />
+                        ) : null}
+                        <span className="font-medium">{category.name}</span>
+                        {isActive && (
+                          <div className="ml-auto w-1 h-6 bg-gradient-to-b from-emerald-400 to-yellow-400 rounded-full"></div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </nav>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search by name or path..."
-                  value={searchQuery}
-                  onChange={async (e) => {
-                    const value = e.target.value;
-                    setSearchQuery(value);
-                    // Clear previous timeout
-                    if (searchTimeout) clearTimeout(searchTimeout);
-                    // Don't search if query is empty
-                    if (!value.trim()) {
-                      setDropdownResults([]);
-                      setShowDropdown(false);
-                      return;
-                    }
-                    setIsSearching(true);
-                    setShowDropdown(true);
-                    // Set new timeout with debounce
-                    setSearchTimeout(
-                      setTimeout(async () => {
-                        try {
-                          const data = await catalogApi.search(value);
-                          console.log("Search results:", data); // Debugging
-                          setDropdownResults(data);
-                        } catch (err) {
-                          console.error("Search error:", err);
-                          setDropdownResults([]);
-                          toast({
-                            title: "Search error",
-                            description: "Failed to perform search",
-                            variant: "destructive",
-                          });
-                        } finally {
-                          setIsSearching(false);
-                        }
-                      }, 300)
-                    ); // 300ms debounce delay
-                  }}
-                  className="pl-10 w-80 bg-gray-50 border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
-                />
-                {showDropdown && (
-                  <div className="absolute z-50 left-0 w-full bg-white border rounded shadow mt-2 max-h-64 overflow-auto">
-                    {isSearching ? (
-                      <div className="px-4 py-2 text-gray-500 flex items-center">
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Searching...
-                      </div>
-                    ) : dropdownResults.length > 0 ? (
-                      dropdownResults.map((item) => (
-                        <div
-                          key={`${item.type}-${item.id}`}
-                          className="px-4 py-2 hover:bg-emerald-50 cursor-pointer"
-                          onClick={() => {
-                            setShowDropdown(false);
-                            setSearchQuery("");
-                            if (item.type === "catalog") {
-                              const cat = catalogs.find(
-                                (c) => c._id === item.id
-                              );
-                              if (cat) handleViewDocumentation(cat);
-                            } else if (item.type === "api" && item.catalogId) {
-                              const cat = catalogs.find(
-                                (c) => c._id === item.catalogId
-                              );
-                              if (cat) {
-                                handleViewDocumentation(cat);
-                                setTimeout(() => {
-                                  const pathForHash = item.name
-                                    .replace(/^\//, "")
-                                    .replace(/\//g, "~1");
-                                  window.location.hash = `#/paths/~1${pathForHash}`;
-                                }, 500);
-                              }
-                            }
-                          }}
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* API Grid */}
+            <main className="flex-1 overflow-auto px-8 pb-6 pt-0">
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading catalogs...</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="flex flex-wrap justify-between items-center gap-4 py-4"
+                    ref={dropdownRef}
+                  >
+                    <div className="w-fit flex items-center gap-2">
+                      {/* Business Type */}
+                      <div className="relative">
+                        <button
+                          onClick={() =>
+                            setOpenDropdown(
+                              openDropdown === "business" ? null : "business"
+                            )
+                          }
+                          className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
                         >
-                          {item.type === "api" ? (
-                            <>
-                              <div className="flex items-center gap-2">
-                                {item.method && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {item.method}
-                                  </Badge>
-                                )}
-                                <span className="font-mono text-emerald-600">
-                                  {item.name}
-                                </span>
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {item.catalogName}
-                              </div>
-                            </>
-                          ) : (
-                            <span className="font-semibold text-gray-800">
-                              {item.name}
+                          Business Type
+                          {selectedBusinessTypes.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              ({selectedBusinessTypes.length})
                             </span>
                           )}
-                        </div>
-                      ))
-                    ) : searchQuery.trim() && !isSearching ? (
-                      <div className="px-4 py-2 text-gray-500">
-                        No results found
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-              <Button
-                onClick={() => setIsAddModalOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add New API
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        {/* API Grid */}
-        <main className="flex-1 overflow-auto p-6">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-4" />
-                <p className="text-gray-600">Loading catalogs...</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div
-                className="flex flex-wrap items-center gap-4  py-4"
-                ref={dropdownRef}
-              >
-                {/* Business Type */}
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setOpenDropdown(
-                        openDropdown === "business" ? null : "business"
-                      )
-                    }
-                    className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
-                  >
-                    Business Type
-                    {selectedBusinessTypes.length > 0 && (
-                      <span className="text-xs text-gray-500">
-                        ({selectedBusinessTypes.length})
-                      </span>
-                    )}
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  <AnimatePresence>
-                    {openDropdown === "business" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
-                      >
-                        {businessTypes.map((type) => (
-                          <label
-                            key={type._id}
-                            className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
-                          >
-                            <div className="flex items-center">
-                              <input
-                                type="checkbox"
-                                checked={selectedBusinessTypes.includes(
-                                  type._id
-                                )}
-                                onChange={() =>
-                                  toggleFilter(
-                                    selectedBusinessTypes,
-                                    type._id,
-                                    setSelectedBusinessTypes
-                                  )
-                                }
-                                className="mr-2 accent-emerald-600"
-                              />
-                              <span className="text-sm text-gray-700">
-                                {type.name}
-                              </span>
-                            </div>
-                            {typeof type.count === "number" && (
-                              <span className="text-xs text-gray-500">
-                                ({type.count})
-                              </span>
-                            )}
-                          </label>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Region Availability */}
-                <div className="relative">
-                  <button
-                    onClick={() =>
-                      setOpenDropdown(
-                        openDropdown === "region" ? null : "region"
-                      )
-                    }
-                    className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
-                  >
-                    Regional Availability
-                    {selectedRegions.length > 0 && (
-                      <span className="text-xs text-gray-500">
-                        ({selectedRegions.length})
-                      </span>
-                    )}
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  <AnimatePresence>
-                    {openDropdown === "region" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
-                      >
-                        {regions.map((region) => (
-                          <label
-                            key={region._id}
-                            className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
-                          >
-                            <div className="flex items-center">
-                              <input
-                                type="checkbox"
-                                checked={selectedRegions.includes(region._id)}
-                                onChange={() =>
-                                  toggleFilter(
-                                    selectedRegions,
-                                    region._id,
-                                    setSelectedRegions
-                                  )
-                                }
-                                className="mr-2 accent-emerald-600"
-                              />
-                              <span className="text-sm text-gray-700">
-                                {region.name}
-                              </span>
-                            </div>
-                            <span className="text-xs text-gray-500">
-                              ({region.count || 0})
-                            </span>
-                          </label>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <div className="w-full">
-                  {/* Tags & Clear */}
-                  {(selectedRegions.length > 0 ||
-                    selectedBusinessTypes.length > 0) && (
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="font-medium text-gray-700">
-                        {selectedRegions.length + selectedBusinessTypes.length}{" "}
-                        results filtered by
-                      </span>
-                      {selectedRegions.map((rId) => {
-                        const region = regions.find((r) => r._id === rId);
-                        return (
-                          <span
-                            key={rId}
-                            className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
-                          >
-                            {region?.name}
-                            <X
-                              className="w-3 h-3 cursor-pointer"
-                              onClick={() =>
-                                setSelectedRegions(
-                                  selectedRegions.filter((id) => id !== rId)
-                                )
-                              }
-                            />
-                          </span>
-                        );
-                      })}
-                      {selectedBusinessTypes.map((bId) => {
-                        const type = businessTypes.find((b) => b._id === bId);
-                        return (
-                          <span
-                            key={bId}
-                            className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
-                          >
-                            {type?.name}
-                            <X
-                              className="w-3 h-3 cursor-pointer"
-                              onClick={() =>
-                                setSelectedBusinessTypes(
-                                  selectedBusinessTypes.filter(
-                                    (id) => id !== bId
-                                  )
-                                )
-                              }
-                            />
-                          </span>
-                        );
-                      })}
-                      <button
-                        onClick={clearFilters}
-                        className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 ml-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Clear all
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredCatalogs.map((catalog) => (
-                  <Card
-                    key={catalog._id}
-                    className="group hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-1 border-gray-200 hover:border-emerald-200 bg-white cursor-pointer"
-                    onClick={() => handleViewDocumentation(catalog)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{
-                                backgroundColor: catalog.color || "#059669",
-                              }}
-                            />
-                            <CardTitle className="text-lg font-bold text-emerald-700 group-hover:text-emerald-800 transition-colors">
-                              {catalog.name}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge
-                              className={getCategoryColor(catalog.category)}
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <AnimatePresence>
+                          {openDropdown === "business" && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -8 }}
+                              transition={{ duration: 0.15 }}
+                              className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
                             >
-                              {typeof catalog.category === "string"
-                                ? categories.find(
-                                    (cat) => cat._id === catalog.category
-                                  )?.name || catalog.category
-                                : catalog.category?.name || "Unknown"}
-                            </Badge>
-                            <Badge className={getStatusColor(catalog.status)}>
-                              {catalog.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleView(catalog);
-                            }}
-                            className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(catalog);
-                            }}
-                            className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(catalog);
-                            }}
-                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              {businessTypes.map((type) => (
+                                <label
+                                  key={type._id}
+                                  className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
+                                >
+                                  <div className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedBusinessTypes.includes(
+                                        type._id
+                                      )}
+                                      onChange={() =>
+                                        toggleFilter(
+                                          selectedBusinessTypes,
+                                          type._id,
+                                          setSelectedBusinessTypes
+                                        )
+                                      }
+                                      className="mr-2 accent-emerald-600"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                      {type.name}
+                                    </span>
+                                  </div>
+                                  {typeof type.count === "number" && (
+                                    <span className="text-xs text-gray-500">
+                                      ({type.count})
+                                    </span>
+                                  )}
+                                </label>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Region Availability */}
+                      <div className="relative">
+                        <button
+                          onClick={() =>
+                            setOpenDropdown(
+                              openDropdown === "region" ? null : "region"
+                            )
+                          }
+                          className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
+                        >
+                          Regional Availability
+                          {selectedRegions.length > 0 && (
+                            <span className="text-xs text-gray-500">
+                              ({selectedRegions.length})
+                            </span>
+                          )}
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <AnimatePresence>
+                          {openDropdown === "region" && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -8 }}
+                              transition={{ duration: 0.15 }}
+                              className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg p-2"
+                            >
+                              {regions.map((region) => (
+                                <label
+                                  key={region._id}
+                                  className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer"
+                                >
+                                  <div className="flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedRegions.includes(
+                                        region._id
+                                      )}
+                                      onChange={() =>
+                                        toggleFilter(
+                                          selectedRegions,
+                                          region._id,
+                                          setSelectedRegions
+                                        )
+                                      }
+                                      className="mr-2 accent-emerald-600"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                      {region.name}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    ({region.count || 0})
+                                  </span>
+                                </label>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                    <div className="w-fit">
+                      <Button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-primary text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add New API
+                      </Button>
+                    </div>
+                    <div className="w-full">
+                      {/* Tags & Clear */}
+                      {(selectedRegions.length > 0 ||
+                        selectedBusinessTypes.length > 0) && (
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
+                          <span className="font-medium text-gray-700">
+                            {selectedRegions.length +
+                              selectedBusinessTypes.length}{" "}
+                            results filtered by
+                          </span>
+                          {selectedRegions.map((rId) => {
+                            const region = regions.find((r) => r._id === rId);
+                            return (
+                              <span
+                                key={rId}
+                                className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                              >
+                                {region?.name}
+                                <X
+                                  className="w-3 h-3 cursor-pointer"
+                                  onClick={() =>
+                                    setSelectedRegions(
+                                      selectedRegions.filter((id) => id !== rId)
+                                    )
+                                  }
+                                />
+                              </span>
+                            );
+                          })}
+                          {selectedBusinessTypes.map((bId) => {
+                            const type = businessTypes.find(
+                              (b) => b._id === bId
+                            );
+                            return (
+                              <span
+                                key={bId}
+                                className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                              >
+                                {type?.name}
+                                <X
+                                  className="w-3 h-3 cursor-pointer"
+                                  onClick={() =>
+                                    setSelectedBusinessTypes(
+                                      selectedBusinessTypes.filter(
+                                        (id) => id !== bId
+                                      )
+                                    )
+                                  }
+                                />
+                              </span>
+                            );
+                          })}
+                          <button
+                            onClick={clearFilters}
+                            className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 ml-2"
                           >
                             <Trash2 className="w-4 h-4" />
+                            Clear all
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredCatalogs.map((catalog) => (
+                      <Card
+                        key={catalog._id}
+                        className="group  transition-all duration-700 hover:-translate-y-2 border-gray-200 hover:border-emerald-200 bg-white cursor-pointer"
+                        onClick={() => handleViewDocumentation(catalog)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{
+                                    backgroundColor: catalog.color || "#059669",
+                                  }}
+                                />
+                                <CardTitle className="text-lg font-bold text-primary transition-colors">
+                                  {catalog.name}
+                                </CardTitle>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge
+                                  className={getCategoryColor(catalog.category)}
+                                >
+                                  {typeof catalog.category === "string"
+                                    ? categories.find(
+                                        (cat) => cat._id === catalog.category
+                                      )?.name || catalog.category
+                                    : catalog.category?.name || "Unknown"}
+                                </Badge>
+                                <Badge
+                                  className={getStatusColor(catalog.status)}
+                                >
+                                  {catalog.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleView(catalog);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-emerald-50 hover:text-emerald-600"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(catalog);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(catalog);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <CardDescription className="text-gray-600 mb-4 line-clamp-3">
+                            {catalog.description || "No description available"}
+                          </CardDescription>
+                          <div className="space-y-3">
+                            <Badge
+                              className={getVisibilityColor(catalog.visibility)}
+                              variant="outline"
+                            >
+                              {catalog.visibility}
+                            </Badge>
+                            <div className="flex flex-wrap gap-1">
+                              {catalog.tags.slice(0, 3).map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="outline"
+                                  className="text-xs bg-gray-50 text-gray-500  transition-colors"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {catalog.tags.length > 3 && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs text-gray-500"
+                                >
+                                  +{catalog.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              )}
+              {!loading && filteredCatalogs.length === 0 && (
+                <div className="text-center py-12">
+                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No APIs found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your search or filter criteria.
+                  </p>
+                </div>
+              )}
+            </main>
+          </div>
+
+          {/* Add/Edit API Modal */}
+          <FileSizeErrorModal
+            isOpen={isFileSizeErrorModalOpen}
+            onClose={() => setIsFileSizeErrorModalOpen(false)}
+          />
+          <Dialog
+            open={isAddModalOpen || isEditModalOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                setIsAddModalOpen(false);
+                setIsEditModalOpen(false);
+                setSelectedCatalog(null);
+              }
+            }}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-emerald-700">
+                  {isEditModalOpen ? "Edit API Catalog" : "Add New API"}
+                </DialogTitle>
+                <DialogDescription>
+                  {isEditModalOpen
+                    ? "Update the catalog details"
+                    : "Create a new API catalog with all necessary details."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                <div className="grid ">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Catalog Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      placeholder="Enter catalog name"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    placeholder="Describe what this catalog contains..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value: any) =>
+                        setFormData({ ...formData, category: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories
+                          .filter((cat) => cat._id !== "all")
+                          .map((category) => (
+                            <SelectItem key={category._id} value={category._id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        <div className="border-t mt-2 pt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            onClick={() => setIsAddCategoryModalOpen(true)}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Category
                           </Button>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <CardDescription className="text-gray-600 mb-4 line-clamp-3">
-                        {catalog.description || "No description available"}
-                      </CardDescription>
-                      <div className="space-y-3">
-                        <Badge
-                          className={getVisibilityColor(catalog.visibility)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {/* Region Availability */}
+                  <div className="space-y-2">
+                    <Label>Region Availability</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
                           variant="outline"
+                          className="w-full justify-start text-left font-normal truncate"
                         >
-                          {catalog.visibility}
-                        </Badge>
-                        <div className="flex flex-wrap gap-1">
-                          {catalog.tags.slice(0, 3).map((tag) => (
+                          {formData.regions?.length
+                            ? regions
+                                .filter((r) =>
+                                  formData.regions?.includes(r._id)
+                                )
+                                .map((r) => r.name)
+                                .join(", ")
+                            : "Select regions"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                        {regions.map((region) => (
+                          <div
+                            key={region._id}
+                            className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                regions: prev.regions?.includes(region._id)
+                                  ? prev.regions.filter(
+                                      (id) => id !== region._id
+                                    )
+                                  : [...(prev.regions || []), region._id],
+                              }));
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.regions?.includes(region._id)}
+                              readOnly
+                              className="accent-emerald-600 mr-2"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {region.name}
+                            </span>
+                          </div>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Business Type */}
+                  <div className="space-y-2">
+                    <Label>Business Type</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal truncate"
+                        >
+                          {formData.businessTypes?.length
+                            ? businessTypes
+                                .filter((b) =>
+                                  formData.businessTypes?.includes(b._id)
+                                )
+                                .map((b) => b.name)
+                                .join(", ")
+                            : "Select business types"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
+                        {businessTypes.map((type) => (
+                          <div
+                            key={type._id}
+                            className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                businessTypes: prev.businessTypes?.includes(
+                                  type._id
+                                )
+                                  ? prev.businessTypes.filter(
+                                      (id) => id !== type._id
+                                    )
+                                  : [...(prev.businessTypes || []), type._id],
+                              }));
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.businessTypes?.includes(
+                                type._id
+                              )}
+                              readOnly
+                              className="accent-emerald-600 mr-2"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {type.name}
+                            </span>
+                          </div>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="visibility">Visibility</Label>
+                    <Select
+                      value={formData.visibility}
+                      onValueChange={(value: any) =>
+                        setFormData({ ...formData, visibility: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value: any) =>
+                        setFormData({ ...formData, status: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tags</Label>
+                  <Input
+                    id="tags"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    onBlur={() => handleTagsChange(tagsInput)}
+                    placeholder="Enter tags separated by commas"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="openapi">
+                    Import OpenAPI File (optional)
+                  </Label>
+                  <div
+                    className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${
+                      openApiFileError
+                        ? "border-red-400 bg-red-50"
+                        : "border-emerald-200 bg-emerald-50/60"
+                    }      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
+                    tabIndex={0}
+                    onClick={() => document.getElementById("openapi")?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ")
+                        document.getElementById("openapi")?.click();
+                    }}
+                    style={{ minHeight: "90px" }}
+                  >
+                    <input
+                      id="openapi"
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json,.yaml,.yml"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      tabIndex={-1}
+                      onClick={(e) => e.stopPropagation()} // Prevent bubbling to div to fix double dialog
+                      onChange={async (e) => {
+                        setOpenApiFileError(null);
+                        const file = e.target.files?.[0];
+
+                        if (!file) {
+                          setOpenApiFile(null);
+                          setFormData({ ...formData, openapiSpec: undefined });
+                          return;
+                        }
+
+                        if (file.size > 1048576) {
+                          // Clear file input so user can re-select same file later if needed
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                          setOpenApiFile(null);
+                          setFormData({ ...formData, openapiSpec: undefined });
+                          setIsFileSizeErrorModalOpen(true);
+                          return;
+                        }
+
+                        const ext = file.name.split(".").pop()?.toLowerCase();
+                        if (!["json", "yml", "yaml"].includes(ext || "")) {
+                          setOpenApiFileError(
+                            "Only .json, .yml, and .yaml files are supported."
+                          );
+                          setFormData({ ...formData, openapiSpec: undefined });
+                          return;
+                        }
+
+                        try {
+                          let openapiSpec;
+                          const text = await file.text();
+                          if (ext === "json") openapiSpec = JSON.parse(text);
+                          else
+                            openapiSpec = (
+                              await import("js-yaml")
+                            ).default.load(text);
+                          setFormData({ ...formData, openapiSpec });
+                          setOpenApiFile(file);
+                        } catch (err: unknown) {
+                          setOpenApiFileError(
+                            "File parsing failed: " +
+                              (err instanceof Error
+                                ? err.message
+                                : "Invalid format")
+                          );
+                          setFormData({ ...formData, openapiSpec: undefined });
+                        }
+                      }}
+                    />
+                    <div className="flex flex-col items-center text-center pointer-events-none">
+                      <svg
+                        className="w-8 h-8 mb-2 text-emerald-500"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 16v-8m0 0l-4 4m4-4l4 4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <span className="block font-medium text-emerald-700 text-sm">
+                        Drag &amp; drop your OpenAPI/Swagger file here
+                      </span>
+                      <span className="block text-xs text-gray-600 mt-1">
+                        or{" "}
+                        <span className="text-emerald-600 underline">
+                          click to choose file
+                        </span>
+                        <br />
+                        <span className="text-gray-500">
+                          (.json, .yaml, .yml)
+                        </span>
+                      </span>
+                      {openApiFile && !openApiFileError && (
+                        <div className="text-xs text-emerald-700 pt-2">
+                          Attached: <b>{openApiFile.name}</b>
+                        </div>
+                      )}
+                      {openApiFileError && (
+                        <div className="text-xs text-red-600 pt-2">
+                          {openApiFileError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setIsEditModalOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  onClick={() => handleSubmit(isEditModalOpen)}
+                >
+                  {isEditModalOpen ? "Update Catalog" : "Create New API"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Category Modal */}
+          <Dialog
+            open={isAddCategoryModalOpen}
+            onOpenChange={setIsAddCategoryModalOpen}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-emerald-700">
+                  Add New Category
+                </DialogTitle>
+                <DialogDescription>
+                  Create a new category for organizing your API catalogs.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="categoryName">Category Name</Label>
+                  <Input
+                    id="categoryName"
+                    value={categoryFormData.name}
+                    onChange={(e) =>
+                      setCategoryFormData({
+                        ...categoryFormData,
+                        name: e.target.value,
+                      })
+                    }
+                    placeholder="Enter category name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="categoryDescription">Description</Label>
+                  <Textarea
+                    id="categoryDescription"
+                    value={categoryFormData.description}
+                    onChange={(e) =>
+                      setCategoryFormData({
+                        ...categoryFormData,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="Describe this category..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddCategoryModalOpen(false);
+                    setCategoryFormData({ name: "", description: "" });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                  onClick={handleAddCategory}
+                >
+                  Add Category
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* API Details Drawer */}
+          <Sheet open={isDetailDrawerOpen} onOpenChange={setIsDetailDrawerOpen}>
+            <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto px-0">
+              {selectedCatalog && (
+                <>
+                  <div className="px-8 pt-6 pb-3 border-b bg-gradient-to-br from-emerald-50 to-white rounded-t-lg">
+                    <SheetHeader>
+                      <SheetTitle className="text-2xl font-semibold text-emerald-800 flex items-center gap-3">
+                        <span
+                          className="inline-block w-3 h-3 rounded-full mr-2"
+                          style={{ background: selectedCatalog.color }}
+                        />
+                        {selectedCatalog.name}
+                      </SheetTitle>
+                      <SheetDescription className="text-base mt-2 text-gray-700">
+                        {selectedCatalog.description ||
+                          "No description available"}
+                      </SheetDescription>
+                    </SheetHeader>
+                  </div>
+                  <div className="px-8 py-6 flex flex-col gap-6">
+                    {/* Meta Info as description list */}
+                    <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                      <div>
+                        <dt className="text-gray-500 font-medium">Category</dt>
+                        <dd className="mt-1">
+                          <Badge
+                            className={getCategoryColor(
+                              selectedCatalog.category
+                            )}
+                          >
+                            {typeof selectedCatalog.category === "string"
+                              ? selectedCatalog.category
+                              : selectedCatalog.category?.name || "Unknown"}
+                          </Badge>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">Status</dt>
+                        <dd className="mt-1">
+                          <Badge
+                            className={getStatusColor(selectedCatalog.status)}
+                          >
+                            {selectedCatalog.status}
+                          </Badge>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">
+                          Visibility
+                        </dt>
+                        <dd className="mt-1">
+                          <Badge
+                            className={getVisibilityColor(
+                              selectedCatalog.visibility
+                            )}
+                          >
+                            {selectedCatalog.visibility}
+                          </Badge>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">
+                          Access Roles
+                        </dt>
+                        <dd className="mt-2 flex flex-wrap gap-2">
+                          {selectedCatalog.accessRoles?.map((role) => (
+                            <Badge
+                              key={role}
+                              variant="outline"
+                              className="bg-blue-50 text-blue-700 border-blue-200"
+                            >
+                              {role}
+                            </Badge>
+                          ))}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">Tags</dt>
+                        <dd className="mt-2 flex flex-wrap gap-2">
+                          {selectedCatalog.tags.length === 0 && (
+                            <span className="text-gray-400">—</span>
+                          )}
+                          {selectedCatalog.tags.map((tag) => (
                             <Badge
                               key={tag}
                               variant="outline"
-                              className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition-colors"
+                              className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center"
                             >
+                              <TagIcon className="w-3 h-3 mr-1" />
                               {tag}
                             </Badge>
                           ))}
-                          {catalog.tags.length > 3 && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs text-gray-500"
-                            >
-                              +{catalog.tags.length - 3}
-                            </Badge>
-                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">Created</dt>
+                        <dd className="mt-1">
+                          {new Date(selectedCatalog.createdAt).toLocaleString()}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-gray-500 font-medium">
+                          Last Updated
+                        </dt>
+                        <dd className="mt-1">
+                          {new Date(selectedCatalog.updatedAt).toLocaleString()}
+                        </dd>
+                      </div>
+                    </dl>
+                    {/* Divider */}
+                    <div className="border-t pt-6">
+                      <div className="flex gap-3">
+                        <Button
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => {
+                            setIsDetailDrawerOpen(false);
+                            handleViewDocumentation(selectedCatalog);
+                          }}
+                          disabled={!selectedCatalog.openapiSpec}
+                        >
+                          <Code className="w-4 h-4 mr-2" />
+                          View Documentation
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 bg-transparent"
+                          onClick={() => {
+                            setIsDetailDrawerOpen(false);
+                            handleEdit(selectedCatalog);
+                          }}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                    {/* Inline Doc Preview */}
+                    {selectedCatalog.openapiSpec && (
+                      <div className="mt-6">
+                        <div className="mb-2 font-semibold text-gray-800 text-lg">
+                          Quick API Doc Preview
+                        </div>
+                        <div className="border rounded bg-gray-50">
+                          <RedocStandalone
+                            spec={selectedCatalog.openapiSpec}
+                            options={{
+                              theme: {
+                                colors: {
+                                  primary: {
+                                    main: selectedCatalog?.color || "#059669",
+                                  },
+                                },
+                                typography: {
+                                  fontSize: "14px",
+                                  fontFamily: "inherit",
+                                },
+                              },
+                              hideDownloadButton: true,
+                              nativeScrollbars: true,
+                              expandResponses: "200,201",
+                              expandSingleSchemaField: true,
+                            }}
+                          />
+                          {/* If Redoc is not installed, fallback: */}
+                          {/* <pre className="text-xs p-4">{JSON.stringify(selectedCatalog.openapiSpec, null, 2)}</pre> */}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </>
-          )}
-          {!loading && filteredCatalogs.length === 0 && (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No APIs found
-              </h3>
-              <p className="text-gray-500">
-                Try adjusting your search or filter criteria.
-              </p>
-            </div>
-          )}
-        </main>
+                    )}
+                  </div>
+                </>
+              )}
+            </SheetContent>
+          </Sheet>
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Catalog</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{selectedCatalog?.name}"?
+                  This action cannot be undone and will also delete all
+                  associated APIs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
-
-      {/* Add/Edit API Modal */}
-      <FileSizeErrorModal
-        isOpen={isFileSizeErrorModalOpen}
-        onClose={() => setIsFileSizeErrorModalOpen(false)}
-      />
-      <Dialog
-        open={isAddModalOpen || isEditModalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsAddModalOpen(false);
-            setIsEditModalOpen(false);
-            setSelectedCatalog(null);
-          }
-        }}
-      >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-emerald-700">
-              {isEditModalOpen ? "Edit API Catalog" : "Add New API"}
-            </DialogTitle>
-            <DialogDescription>
-              {isEditModalOpen
-                ? "Update the catalog details"
-                : "Create a new API catalog with all necessary details."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-4">
-            <div className="grid ">
-              <div className="space-y-2">
-                <Label htmlFor="name">Catalog Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="Enter catalog name"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Describe what this catalog contains..."
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value: any) =>
-                    setFormData({ ...formData, category: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories
-                      .filter((cat) => cat._id !== "all")
-                      .map((category) => (
-                        <SelectItem key={category._id} value={category._id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    <div className="border-t mt-2 pt-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                        onClick={() => setIsAddCategoryModalOpen(true)}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Category
-                      </Button>
-                    </div>
-                  </SelectContent>
-                </Select>
-              </div>
-              {/* Region Availability */}
-              <div className="space-y-2">
-                <Label>Region Availability</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal truncate"
-                    >
-                      {formData.regions?.length
-                        ? regions
-                            .filter((r) => formData.regions?.includes(r._id))
-                            .map((r) => r.name)
-                            .join(", ")
-                        : "Select regions"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
-                    {regions.map((region) => (
-                      <div
-                        key={region._id}
-                        className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
-                        onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            regions: prev.regions?.includes(region._id)
-                              ? prev.regions.filter((id) => id !== region._id)
-                              : [...(prev.regions || []), region._id],
-                          }));
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.regions?.includes(region._id)}
-                          readOnly
-                          className="accent-emerald-600 mr-2"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {region.name}
-                        </span>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Business Type */}
-              <div className="space-y-2">
-                <Label>Business Type</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal truncate"
-                    >
-                      {formData.businessTypes?.length
-                        ? businessTypes
-                            .filter((b) =>
-                              formData.businessTypes?.includes(b._id)
-                            )
-                            .map((b) => b.name)
-                            .join(", ")
-                        : "Select business types"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[250px] max-h-64 overflow-y-auto p-2">
-                    {businessTypes.map((type) => (
-                      <div
-                        key={type._id}
-                        className="flex items-center px-2 py-2 rounded cursor-pointer hover:bg-emerald-50"
-                        onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            businessTypes: prev.businessTypes?.includes(
-                              type._id
-                            )
-                              ? prev.businessTypes.filter(
-                                  (id) => id !== type._id
-                                )
-                              : [...(prev.businessTypes || []), type._id],
-                          }));
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.businessTypes?.includes(type._id)}
-                          readOnly
-                          className="accent-emerald-600 mr-2"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {type.name}
-                        </span>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="visibility">Visibility</Label>
-                <Select
-                  value={formData.visibility}
-                  onValueChange={(value: any) =>
-                    setFormData({ ...formData, visibility: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select visibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: any) =>
-                    setFormData({ ...formData, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
-              <Input
-                id="tags"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                onBlur={() => handleTagsChange(tagsInput)}
-                placeholder="Enter tags separated by commas"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="openapi">Import OpenAPI File (optional)</Label>
-              <div
-                className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${
-                  openApiFileError
-                    ? "border-red-400 bg-red-50"
-                    : "border-emerald-200 bg-emerald-50/60"
-                }      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
-                tabIndex={0}
-                onClick={() => document.getElementById("openapi")?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ")
-                    document.getElementById("openapi")?.click();
-                }}
-                style={{ minHeight: "90px" }}
-              >
-                <input
-                  id="openapi"
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json,.yaml,.yml"
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  tabIndex={-1}
-                  onClick={(e) => e.stopPropagation()} // Prevent bubbling to div to fix double dialog
-                  onChange={async (e) => {
-                    setOpenApiFileError(null);
-                    const file = e.target.files?.[0];
-
-                    if (!file) {
-                      setOpenApiFile(null);
-                      setFormData({ ...formData, openapiSpec: undefined });
-                      return;
-                    }
-
-                    if (file.size > 1048576) {
-                      // Clear file input so user can re-select same file later if needed
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
-                      }
-                      setOpenApiFile(null);
-                      setFormData({ ...formData, openapiSpec: undefined });
-                      setIsFileSizeErrorModalOpen(true);
-                      return;
-                    }
-
-                    const ext = file.name.split(".").pop()?.toLowerCase();
-                    if (!["json", "yml", "yaml"].includes(ext || "")) {
-                      setOpenApiFileError(
-                        "Only .json, .yml, and .yaml files are supported."
-                      );
-                      setFormData({ ...formData, openapiSpec: undefined });
-                      return;
-                    }
-
-                    try {
-                      let openapiSpec;
-                      const text = await file.text();
-                      if (ext === "json") openapiSpec = JSON.parse(text);
-                      else
-                        openapiSpec = (await import("js-yaml")).default.load(
-                          text
-                        );
-                      setFormData({ ...formData, openapiSpec });
-                      setOpenApiFile(file);
-                    } catch (err: unknown) {
-                      setOpenApiFileError(
-                        "File parsing failed: " +
-                          (err instanceof Error
-                            ? err.message
-                            : "Invalid format")
-                      );
-                      setFormData({ ...formData, openapiSpec: undefined });
-                    }
-                  }}
-                />
-                <div className="flex flex-col items-center text-center pointer-events-none">
-                  <svg
-                    className="w-8 h-8 mb-2 text-emerald-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 16v-8m0 0l-4 4m4-4l4 4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span className="block font-medium text-emerald-700 text-sm">
-                    Drag &amp; drop your OpenAPI/Swagger file here
-                  </span>
-                  <span className="block text-xs text-gray-600 mt-1">
-                    or{" "}
-                    <span className="text-emerald-600 underline">
-                      click to choose file
-                    </span>
-                    <br />
-                    <span className="text-gray-500">(.json, .yaml, .yml)</span>
-                  </span>
-                  {openApiFile && !openApiFileError && (
-                    <div className="text-xs text-emerald-700 pt-2">
-                      Attached: <b>{openApiFile.name}</b>
-                    </div>
-                  )}
-                  {openApiFileError && (
-                    <div className="text-xs text-red-600 pt-2">
-                      {openApiFileError}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddModalOpen(false);
-                setIsEditModalOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={() => handleSubmit(isEditModalOpen)}
-            >
-              {isEditModalOpen ? "Update Catalog" : "Create New API"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Category Modal */}
-      <Dialog
-        open={isAddCategoryModalOpen}
-        onOpenChange={setIsAddCategoryModalOpen}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-emerald-700">
-              Add New Category
-            </DialogTitle>
-            <DialogDescription>
-              Create a new category for organizing your API catalogs.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="categoryName">Category Name</Label>
-              <Input
-                id="categoryName"
-                value={categoryFormData.name}
-                onChange={(e) =>
-                  setCategoryFormData({
-                    ...categoryFormData,
-                    name: e.target.value,
-                  })
-                }
-                placeholder="Enter category name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="categoryDescription">Description</Label>
-              <Textarea
-                id="categoryDescription"
-                value={categoryFormData.description}
-                onChange={(e) =>
-                  setCategoryFormData({
-                    ...categoryFormData,
-                    description: e.target.value,
-                  })
-                }
-                placeholder="Describe this category..."
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddCategoryModalOpen(false);
-                setCategoryFormData({ name: "", description: "" });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleAddCategory}
-            >
-              Add Category
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* API Details Drawer */}
-      <Sheet open={isDetailDrawerOpen} onOpenChange={setIsDetailDrawerOpen}>
-        <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto px-0">
-          {selectedCatalog && (
-            <>
-              <div className="px-8 pt-6 pb-3 border-b bg-gradient-to-br from-emerald-50 to-white rounded-t-lg">
-                <SheetHeader>
-                  <SheetTitle className="text-2xl font-semibold text-emerald-800 flex items-center gap-3">
-                    <span
-                      className="inline-block w-3 h-3 rounded-full mr-2"
-                      style={{ background: selectedCatalog.color }}
-                    />
-                    {selectedCatalog.name}
-                  </SheetTitle>
-                  <SheetDescription className="text-base mt-2 text-gray-700">
-                    {selectedCatalog.description || "No description available"}
-                  </SheetDescription>
-                </SheetHeader>
-              </div>
-              <div className="px-8 py-6 flex flex-col gap-6">
-                {/* Meta Info as description list */}
-                <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                  <div>
-                    <dt className="text-gray-500 font-medium">Category</dt>
-                    <dd className="mt-1">
-                      <Badge
-                        className={getCategoryColor(selectedCatalog.category)}
-                      >
-                        {typeof selectedCatalog.category === "string"
-                          ? selectedCatalog.category
-                          : selectedCatalog.category?.name || "Unknown"}
-                      </Badge>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Status</dt>
-                    <dd className="mt-1">
-                      <Badge className={getStatusColor(selectedCatalog.status)}>
-                        {selectedCatalog.status}
-                      </Badge>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Visibility</dt>
-                    <dd className="mt-1">
-                      <Badge
-                        className={getVisibilityColor(
-                          selectedCatalog.visibility
-                        )}
-                      >
-                        {selectedCatalog.visibility}
-                      </Badge>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Access Roles</dt>
-                    <dd className="mt-2 flex flex-wrap gap-2">
-                      {selectedCatalog.accessRoles?.map((role) => (
-                        <Badge
-                          key={role}
-                          variant="outline"
-                          className="bg-blue-50 text-blue-700 border-blue-200"
-                        >
-                          {role}
-                        </Badge>
-                      ))}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Tags</dt>
-                    <dd className="mt-2 flex flex-wrap gap-2">
-                      {selectedCatalog.tags.length === 0 && (
-                        <span className="text-gray-400">—</span>
-                      )}
-                      {selectedCatalog.tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="outline"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center"
-                        >
-                          <TagIcon className="w-3 h-3 mr-1" />
-                          {tag}
-                        </Badge>
-                      ))}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Created</dt>
-                    <dd className="mt-1">
-                      {new Date(selectedCatalog.createdAt).toLocaleString()}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500 font-medium">Last Updated</dt>
-                    <dd className="mt-1">
-                      {new Date(selectedCatalog.updatedAt).toLocaleString()}
-                    </dd>
-                  </div>
-                </dl>
-                {/* Divider */}
-                <div className="border-t pt-6">
-                  <div className="flex gap-3">
-                    <Button
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                      onClick={() => {
-                        setIsDetailDrawerOpen(false);
-                        handleViewDocumentation(selectedCatalog);
-                      }}
-                      disabled={!selectedCatalog.openapiSpec}
-                    >
-                      <Code className="w-4 h-4 mr-2" />
-                      View Documentation
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 bg-transparent"
-                      onClick={() => {
-                        setIsDetailDrawerOpen(false);
-                        handleEdit(selectedCatalog);
-                      }}
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-                {/* Inline Doc Preview */}
-                {selectedCatalog.openapiSpec && (
-                  <div className="mt-6">
-                    <div className="mb-2 font-semibold text-gray-800 text-lg">
-                      Quick API Doc Preview
-                    </div>
-                    <div className="border rounded bg-gray-50">
-                      <RedocStandalone
-                        spec={selectedCatalog.openapiSpec}
-                        options={{
-                          theme: {
-                            colors: {
-                              primary: {
-                                main: selectedCatalog?.color || "#059669",
-                              },
-                            },
-                            typography: {
-                              fontSize: "14px",
-                              fontFamily: "inherit",
-                            },
-                          },
-                          hideDownloadButton: true,
-                          nativeScrollbars: true,
-                          expandResponses: "200,201",
-                          expandSingleSchemaField: true,
-                        }}
-                      />
-                      {/* If Redoc is not installed, fallback: */}
-                      {/* <pre className="text-xs p-4">{JSON.stringify(selectedCatalog.openapiSpec, null, 2)}</pre> */}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Catalog</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{selectedCatalog?.name}"? This
-              action cannot be undone and will also delete all associated APIs.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </>
   );
 }
