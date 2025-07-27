@@ -8,6 +8,7 @@ const apiRoutes = require('./routes/apiRoutes');
 const categoryRoutes = require('./routes/categories');
 const businessTypeRoutes = require('./routes/businessTypeRoutes');
 const regionRoutes = require('./routes/regionRoutes');
+const authRoutes = require('./routes/auth');
 const seedStaticData = require('./scripts/seedStaticData');
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/apis', apiRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/regions', regionRoutes);
 app.use('/api/business-types', businessTypeRoutes);
+app.use("/api/auth",authRoutes);
 
 // Default route
 app.get('/', (req, res) => res.send('API Catalog backend is running!'));

@@ -79,9 +79,10 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "./components/ui/popover";
-import DashboardHeader from "./components/common/Header";
-import Hero from "./components/Hero";
+} from "./ui/popover";
+import DashboardHeader from "./common/Header";
+import Hero from "./Hero";
+import { getUserRole } from "@/lib/auth";
 
 type CategoryWithIcon = Category & {
   icon?: ComponentType<LucideProps>;
@@ -194,7 +195,7 @@ const getVisibilityColor = (visibility?: string) => {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export default function APICatalogDashboard() {
+export default function APICatalogDashboard({ role }: { role: "admin" | "user" }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -482,9 +483,8 @@ export default function APICatalogDashboard() {
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to ${
-          isEdit ? "update" : formData.openapiSpec ? "import" : "create"
-        } catalog`,
+        description: `Failed to ${isEdit ? "update" : formData.openapiSpec ? "import" : "create"
+          } catalog`,
         variant: "destructive",
       });
     }
@@ -620,17 +620,15 @@ export default function APICatalogDashboard() {
                       <button
                         key={category._id}
                         onClick={() => setSelectedCategory(category._id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                          isActive
-                            ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${isActive
+                          ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          }`}
                       >
                         {Icon ? (
                           <Icon
-                            className={`w-5 h-5 ${
-                              isActive ? "text-emerald-600" : "text-gray-400"
-                            }`}
+                            className={`w-5 h-5 ${isActive ? "text-emerald-600" : "text-gray-400"
+                              }`}
                           />
                         ) : null}
                         <span className="font-medium">{category.name}</span>
@@ -788,75 +786,75 @@ export default function APICatalogDashboard() {
                       </div>
                     </div>
                     <div className="w-fit">
-                      <Button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="bg-primary text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add New API
-                      </Button>
+                      {role === "admin" && (
+                        <Button onClick={() => setIsAddModalOpen(true)} >
+                          Add New API
+                        </Button>
+                      )}
+
+
                     </div>
                     <div className="w-full">
                       {/* Tags & Clear */}
                       {(selectedRegions.length > 0 ||
                         selectedBusinessTypes.length > 0) && (
-                        <div className="flex flex-wrap items-center gap-2 text-sm">
-                          <span className="font-medium text-gray-700">
-                            {selectedRegions.length +
-                              selectedBusinessTypes.length}{" "}
-                            results filtered by
-                          </span>
-                          {selectedRegions.map((rId) => {
-                            const region = regions.find((r) => r._id === rId);
-                            return (
-                              <span
-                                key={rId}
-                                className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
-                              >
-                                {region?.name}
-                                <X
-                                  className="w-3 h-3 cursor-pointer"
-                                  onClick={() =>
-                                    setSelectedRegions(
-                                      selectedRegions.filter((id) => id !== rId)
-                                    )
-                                  }
-                                />
-                              </span>
-                            );
-                          })}
-                          {selectedBusinessTypes.map((bId) => {
-                            const type = businessTypes.find(
-                              (b) => b._id === bId
-                            );
-                            return (
-                              <span
-                                key={bId}
-                                className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
-                              >
-                                {type?.name}
-                                <X
-                                  className="w-3 h-3 cursor-pointer"
-                                  onClick={() =>
-                                    setSelectedBusinessTypes(
-                                      selectedBusinessTypes.filter(
-                                        (id) => id !== bId
+                          <div className="flex flex-wrap items-center gap-2 text-sm">
+                            <span className="font-medium text-gray-700">
+                              {selectedRegions.length +
+                                selectedBusinessTypes.length}{" "}
+                              results filtered by
+                            </span>
+                            {selectedRegions.map((rId) => {
+                              const region = regions.find((r) => r._id === rId);
+                              return (
+                                <span
+                                  key={rId}
+                                  className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                                >
+                                  {region?.name}
+                                  <X
+                                    className="w-3 h-3 cursor-pointer"
+                                    onClick={() =>
+                                      setSelectedRegions(
+                                        selectedRegions.filter((id) => id !== rId)
                                       )
-                                    )
-                                  }
-                                />
-                              </span>
-                            );
-                          })}
-                          <button
-                            onClick={clearFilters}
-                            className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 ml-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Clear all
-                          </button>
-                        </div>
-                      )}
+                                    }
+                                  />
+                                </span>
+                              );
+                            })}
+                            {selectedBusinessTypes.map((bId) => {
+                              const type = businessTypes.find(
+                                (b) => b._id === bId
+                              );
+                              return (
+                                <span
+                                  key={bId}
+                                  className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full flex items-center gap-1"
+                                >
+                                  {type?.name}
+                                  <X
+                                    className="w-3 h-3 cursor-pointer"
+                                    onClick={() =>
+                                      setSelectedBusinessTypes(
+                                        selectedBusinessTypes.filter(
+                                          (id) => id !== bId
+                                        )
+                                      )
+                                    }
+                                  />
+                                </span>
+                              );
+                            })}
+                            <button
+                              onClick={clearFilters}
+                              className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 ml-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Clear all
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -889,8 +887,8 @@ export default function APICatalogDashboard() {
                                 >
                                   {typeof catalog.category === "string"
                                     ? categories.find(
-                                        (cat) => cat._id === catalog.category
-                                      )?.name || catalog.category
+                                      (cat) => cat._id === catalog.category
+                                    )?.name || catalog.category
                                     : catalog.category?.name || "Unknown"}
                                 </Badge>
                                 <Badge
@@ -914,29 +912,35 @@ export default function APICatalogDashboard() {
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(catalog);
-                                }}
-                                className="h-8 w-8 p-0 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(catalog);
-                                }}
-                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+
+                              {getUserRole() === "admin" && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEdit(catalog);
+                                    }}
+                                    className="h-8 w-8 p-0 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDelete(catalog);
+                                    }}
+                                    className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
+
                           </div>
                         </CardHeader>
 
@@ -1094,11 +1098,11 @@ export default function APICatalogDashboard() {
                         >
                           {formData.regions?.length
                             ? regions
-                                .filter((r) =>
-                                  formData.regions?.includes(r._id)
-                                )
-                                .map((r) => r.name)
-                                .join(", ")
+                              .filter((r) =>
+                                formData.regions?.includes(r._id)
+                              )
+                              .map((r) => r.name)
+                              .join(", ")
                             : "Select regions"}
                         </Button>
                       </PopoverTrigger>
@@ -1112,8 +1116,8 @@ export default function APICatalogDashboard() {
                                 ...prev,
                                 regions: prev.regions?.includes(region._id)
                                   ? prev.regions.filter(
-                                      (id) => id !== region._id
-                                    )
+                                    (id) => id !== region._id
+                                  )
                                   : [...(prev.regions || []), region._id],
                               }));
                             }}
@@ -1144,11 +1148,11 @@ export default function APICatalogDashboard() {
                         >
                           {formData.businessTypes?.length
                             ? businessTypes
-                                .filter((b) =>
-                                  formData.businessTypes?.includes(b._id)
-                                )
-                                .map((b) => b.name)
-                                .join(", ")
+                              .filter((b) =>
+                                formData.businessTypes?.includes(b._id)
+                              )
+                              .map((b) => b.name)
+                              .join(", ")
                             : "Select business types"}
                         </Button>
                       </PopoverTrigger>
@@ -1164,8 +1168,8 @@ export default function APICatalogDashboard() {
                                   type._id
                                 )
                                   ? prev.businessTypes.filter(
-                                      (id) => id !== type._id
-                                    )
+                                    (id) => id !== type._id
+                                  )
                                   : [...(prev.businessTypes || []), type._id],
                               }));
                             }}
@@ -1237,11 +1241,10 @@ export default function APICatalogDashboard() {
                     Import OpenAPI File (optional)
                   </Label>
                   <div
-                    className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${
-                      openApiFileError
-                        ? "border-red-400 bg-red-50"
-                        : "border-emerald-200 bg-emerald-50/60"
-                    }      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
+                    className={`      relative flex flex-col items-center justify-center border-2 border-dashed       ${openApiFileError
+                      ? "border-red-400 bg-red-50"
+                      : "border-emerald-200 bg-emerald-50/60"
+                      }      rounded-lg p-5 cursor-pointer transition      hover:border-emerald-400 hover:bg-emerald-100/70      focus-within:ring-2 focus-within:ring-emerald-400    `}
                     tabIndex={0}
                     onClick={() => document.getElementById("openapi")?.click()}
                     onKeyDown={(e) => {
@@ -1301,9 +1304,9 @@ export default function APICatalogDashboard() {
                         } catch (err: unknown) {
                           setOpenApiFileError(
                             "File parsing failed: " +
-                              (err instanceof Error
-                                ? err.message
-                                : "Invalid format")
+                            (err instanceof Error
+                              ? err.message
+                              : "Invalid format")
                           );
                           setFormData({ ...formData, openapiSpec: undefined });
                         }
@@ -1636,7 +1639,7 @@ export default function APICatalogDashboard() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </div>
+      </div >
     </>
   );
 }
