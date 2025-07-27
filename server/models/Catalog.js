@@ -10,13 +10,6 @@ const CatalogSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   accessRoles: [{ type: String, enum: ['admin', 'developer'] }], // Can add more roles
   tags: [String],
-  regions: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Region',
-      required: true
-    }
-  ],
   businessTypes: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessType', required: true }
   ],

@@ -9,7 +9,6 @@ const categoryRoutes = require('./routes/categories');
 const businessTypeRoutes = require('./routes/businessTypeRoutes');
 const regionRoutes = require('./routes/regionRoutes');
 const authRoutes = require('./routes/auth');
-const seedStaticData = require('./scripts/seedStaticData');
 
 const app = express();
 app.use(cors());
@@ -22,7 +21,6 @@ mongoose.connect(process.env.MONGO_URL, {
 })
   .then(() => {
     console.log('MongoDB connected')
-    seedStaticData(); // Call the seeding function after connecting to the database
   })
   .catch(err => console.error('MongoDB connection error:', err));
 
