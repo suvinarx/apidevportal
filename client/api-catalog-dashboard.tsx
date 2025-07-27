@@ -599,8 +599,7 @@ export default function APICatalogDashboard() {
               Explore Our API
             </h1>
             <p className="mt-2 text-gray-600 text-base">
-              Browse powerful APIs tailored to your business needs. Use filters
-              to quickly narrow down the best-fit solutions.
+              Browse Girlscouts  APIs to find the right solution for you. Use the filter options to refine your search further..
             </p>
           </div>
         </div>
