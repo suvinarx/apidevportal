@@ -2,19 +2,17 @@ const BusinessType = require('../models/BusinessType');
 const Region = require('../models/Region');
 
 const businessTypesData = [
-  { name: "Fintech" },
-  { name: "Healthcare" },
-  { name: "E-commerce" },
-  { name: "Logistics" },
-  { name: "Education" },
+  { name: "Business Type1" },
+  { name: "Business Type2" },
+  { name: "Business Type3" },
+  { name: "Business Type4" },
+  { name: "Business Type5" },
 ];
 
 const regionsData = [
   { name: "US East" },
   { name: "US West" },
-  { name: "Europe Central" },
-  { name: "Asia Pacific" },
-  { name: "Middle East" },
+  
 ];
 
 async function seedStaticData() {

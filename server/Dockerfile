@@ -14,8 +14,8 @@ RUN npm install --production
 COPY . .
 
 # Expose the app port
-EXPOSE 5000
-ENV MONGO_URI=http://localhost:3000/
-ENV PORT=5000
+EXPOSE 5005
+ENV MONGO_URI=http://localhost:3001/
+ENV PORT=5005
 # Start your app
 CMD ["node", "index.js"]
