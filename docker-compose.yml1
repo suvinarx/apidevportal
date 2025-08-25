@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:5
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+
+  server:
+    build: ./server
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/apidevportal
+      - PORT=5000
+    depends_on:
+      - mongo
+
+  client:
+    build:
+      context: ./client
+      args:
+        NEXT_PUBLIC_API_URL:http://44.204.68.110:5001/api/catalogs
+    ports:
+      - "3001:3000"
+    depends_on:
+      - server
+

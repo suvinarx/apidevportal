@@ -11,7 +11,15 @@ const regionRoutes = require('./routes/regionRoutes');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: "http://44.204.68.110:3000",  // React app on EC2
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+
+
 app.use(express.json());
 
 // Database connection
@@ -37,4 +45,6 @@ app.get('/', (req, res) => res.send('API Catalog backend is running!'));
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server started on port ${PORT}`);
+});
