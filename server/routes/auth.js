@@ -5,13 +5,24 @@ const generateToken = require("../utils/jwt");
 const router = express.Router();
 
 // Register
+// routes/auth.js (Register route)
 router.post("/register", async (req, res) => {
-  const { email, password, role } = req.body;
+  const { email, password, role, adminCode } = req.body;
   try {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: "User already exists" });
 
-    const user = new User({ email, password, role });
+    // Require a secret or invite for admin signups
+    if (role === "admin") {
+      if (!process.env.ADMIN_SIGNUP_CODE) {
+        return res.status(500).json({ message: "Admin registration not configured" });
+      }
+      if (adminCode !== process.env.ADMIN_SIGNUP_CODE) {
+        return res.status(403).json({ message: "Invalid admin invite code" });
+      }
+    }
+
+    const user = new User({ email, password, role: role === "admin" ? "admin" : "user" });
     await user.save();
 
     const token = generateToken(user);
@@ -20,6 +31,7 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
 
 // Login
 router.post("/login", async (req, res) => {

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function LoginPage() {
     const router = useRouter()
@@ -177,7 +178,13 @@ export default function LoginPage() {
                                     "Sign In"
                                 )}
                             </Button>
-                        </form>                        
+                            <p className="text-center text-sm text-gray-600">
+                                New to API Developer Portal?{" "}
+                                <Link href="/register" className="font-medium text-emerald-700 hover:text-emerald-800 underline-offset-4 hover:underline">
+                                    Create an account
+                                </Link>
+                            </p>
+                        </form>
                     </CardContent>
                 </Card>
 
