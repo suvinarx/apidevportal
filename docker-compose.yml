@@ -16,7 +16,8 @@ services:
     environment:
       - MONGO_URL=mongodb://mongo:27017/apidevportal
       - PORT=5000
-      - JWT_SECRET=s3cr3t
+      - JWT_SECRET=s3cr3
+      - ADMIN_SIGNUP_CODE=admin123
     depends_on:
       - mongo
 
@@ -25,6 +26,7 @@ services:
       context: ./client
       args:
         NEXT_PUBLIC_API_URL: "http://44.204.68.110:5001/api"
+        NEXT_PUBLIC_REQUIRE_ADMIN_CODE: "true"
     ports:
       - "3000:3000"
     depends_on:
