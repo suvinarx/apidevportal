@@ -17,8 +17,14 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Accept args from docker-compose
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_REQUIRE_ADMIN_CODE
+
+# Export them so Next.js
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_REQUIRE_ADMIN_CODE=$NEXT_PUBLIC_REQUIRE_ADMIN_CODE
 
 # Build Next.js app
 RUN npm run build
