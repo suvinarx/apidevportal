@@ -127,11 +127,7 @@ export default function AdminRegisterPage() {
                 </div>
 
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                    <CardHeader className="space-y-1 pb-6">
-                        <CardTitle className="text-xl font-semibold text-center text-gray-900">Admin Registration</CardTitle>
-                        <CardDescription className="text-center text-gray-600">
-                            This account will have elevated permissions
-                        </CardDescription>
+                    <CardHeader className="pb-6">
                     </CardHeader>
 
                     <CardContent>
@@ -255,10 +251,6 @@ export default function AdminRegisterPage() {
                         </form>
                     </CardContent>
                 </Card>
-
-                <div className="mt-8 text-center">
-                    <p className="text-xs text-gray-500">© 2024 API Developer Portal. All rights reserved.</p>
-                </div>
             </div>
         </div>
     );

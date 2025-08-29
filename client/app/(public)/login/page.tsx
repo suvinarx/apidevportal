@@ -98,11 +98,11 @@ export default function LoginPage() {
 
                 {/* Login Card */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                    <CardHeader className="space-y-1 pb-6">
-                        <CardTitle className="text-xl font-semibold text-center text-gray-900">Sign In</CardTitle>
+                    <CardHeader className="pb-6">
+                        {/* <CardTitle className="text-xl font-semibold text-center text-gray-900">Sign In</CardTitle>
                         <CardDescription className="text-center text-gray-600">
                             Enter your credentials to access your account
-                        </CardDescription>
+                        </CardDescription> */}
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,11 +187,6 @@ export default function LoginPage() {
                         </form>
                     </CardContent>
                 </Card>
-
-                {/* Footer */}
-                <div className="mt-8 text-center">
-                    <p className="text-xs text-gray-500">© 2024 API Developer Portal. All rights reserved.</p>
-                </div>
             </div>
         </div>
     )
