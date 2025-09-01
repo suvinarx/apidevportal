@@ -57,7 +57,7 @@ export interface CreateCatalogData {
   tags?: string[];
   openapiSpec?: any;
   regions?: string[];
-  businessTypes?: string[];
+  // businessTypes?: string[];
 }
 
 // ---- API FUNCTIONS ----
@@ -66,12 +66,12 @@ export interface CreateCatalogData {
 export const catalogApi = {
   getAll: async (filters?: {
   regions?: string[];
-  businessTypes?: string[];
+  // businessTypes?: string[];
 }): Promise<Catalog[]> => {
   const params = new URLSearchParams();
 
   filters?.regions?.forEach((id) => params.append("region", id));
-  filters?.businessTypes?.forEach((id) => params.append("businessType", id));
+  // filters?.businessTypes?.forEach((id) => params.append("businessType", id));
 
   const query = params.toString();
   const res = await fetch(`${API_BASE_URL}/catalogs${query ? `?${query}` : ""}`);

@@ -52,7 +52,8 @@ router.get('/search', async (req, res) => {
 // Get all catalogs
 router.get("/", async (req, res) => {
   try {
-    const { region, businessType } = req.query;
+    // const { region, businessType } = req.query;
+    const { region } = req.query;
 
     const matchStage = {};
 
@@ -65,12 +66,12 @@ router.get("/", async (req, res) => {
     }
 
     // Handle businessType filter (can be string or array)
-    if (businessType) {
-      const businessTypeIds = Array.isArray(businessType)
-        ? businessType.map((id) => new mongoose.Types.ObjectId(id))
-        : [new mongoose.Types.ObjectId(businessType)];
-      matchStage["businessTypes"] = { $in: businessTypeIds };
-    }
+    // if (businessType) {
+    //   const businessTypeIds = Array.isArray(businessType)
+    //     ? businessType.map((id) => new mongoose.Types.ObjectId(id))
+    //     : [new mongoose.Types.ObjectId(businessType)];
+    //   matchStage["businessTypes"] = { $in: businessTypeIds };
+    // }
 
     const catalogs = await Catalog.aggregate([
       { $match: matchStage },
@@ -83,14 +84,14 @@ router.get("/", async (req, res) => {
           as: "regionDetails",
         },
       },
-      {
-        $lookup: {
-          from: "businesstypes",
-          localField: "businessTypes",
-          foreignField: "_id",
-          as: "businessTypeDetails",
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "businesstypes",
+      //     localField: "businessTypes",
+      //     foreignField: "_id",
+      //     as: "businessTypeDetails",
+      //   },
+      // },
       {
         $lookup: {
           from: "categories",
@@ -115,7 +116,7 @@ router.get("/", async (req, res) => {
           tags: 1,
           openApiFileUrl: 1,
           regionDetails: { _id: 1, name: 1, code: 1 },
-          businessTypeDetails: { _id: 1, name: 1, code: 1 },
+          // businessTypeDetails: { _id: 1, name: 1, code: 1 },
         },
       },
     ]);
@@ -131,8 +132,8 @@ router.get("/", async (req, res) => {
 // Create a catalog
 router.post('/', async (req, res) => {
   try {
-    const { name, description, color, category, businessTypes, regions } = req.body;
-    const catalog = new Catalog({ name, description, color, category, businessTypes, regions });
+    const { name, description, color, category, regions } = req.body;
+    const catalog = new Catalog({ name, description, color, category, regions });
     await catalog.save();
     res.status(201).json(catalog);
   } catch (err) {
@@ -180,7 +181,7 @@ router.put('/:catalogId', async (req, res) => {
       description,
       color,
       category,
-      businessTypes,
+      // businessTypes,
       regions,
       visibility,
       status,
@@ -195,7 +196,7 @@ router.put('/:catalogId', async (req, res) => {
         description,
         color,
         category,
-        businessTypes,
+        // businessTypes,
         regions,
         visibility,
         status,

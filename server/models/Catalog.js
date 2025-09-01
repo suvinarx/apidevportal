@@ -10,9 +10,9 @@ const CatalogSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   accessRoles: [{ type: String, enum: ['admin', 'developer'] }], // Can add more roles
   tags: [String],
-  businessTypes: [
-    { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessType', required: true }
-  ],
+  // businessTypes: [
+  //   { type: mongoose.Schema.Types.ObjectId, ref: 'BusinessType', required: true }
+  // ],
   openapiSpec: Object,
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });

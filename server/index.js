@@ -6,7 +6,7 @@ require('dotenv').config();
 const catalogRoutes = require('./routes/catalogRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const categoryRoutes = require('./routes/categories');
-const businessTypeRoutes = require('./routes/businessTypeRoutes');
+// const businessTypeRoutes = require('./routes/businessTypeRoutes');
 const regionRoutes = require('./routes/regionRoutes');
 const authRoutes = require('./routes/auth');
 
@@ -37,7 +37,7 @@ app.use('/api/catalogs', catalogRoutes);
 app.use('/api/apis', apiRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/regions', regionRoutes);
-app.use('/api/business-types', businessTypeRoutes);
+// app.use('/api/business-types', businessTypeRoutes);
 app.use("/api/auth",authRoutes);
 
 // Default route

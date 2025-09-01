@@ -12,9 +12,10 @@ import {
   Code,
   Loader2,
   AlertCircle,
-  type LightbulbIcon as LucideProps,
   ChevronDown,
   X,
+  Plus,
+  LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,8 +56,9 @@ import Hero from "./Hero"
 import { getUserRole } from "@/lib/auth"
 
 type CategoryWithIcon = Category & {
-  icon?: ComponentType<LucideProps>
-}
+  icon?: LucideIcon;
+};
+
 
 const defaultCategories = [
   { id: "all", name: "All", icon: Grid3X3 },
@@ -186,18 +188,19 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
   })
 
   const [regions, setRegions] = useState<{ _id: string; name: string; count: string }[]>([])
-  const [businessTypes, setBusinessTypes] = useState<{ _id: string; name: string; count: string }[]>([])
+  // const [businessTypes, setBusinessTypes] = useState<{ _id: string; name: string; count: string }[]>([])
 
   const fetchMetaData: () => Promise<void> = async () => {
     try {
-      const [regionRes, businessTypeRes] = await Promise.all([
+      // const [regionRes, businessTypeRes] = await Promise.all([
+      const [regionRes] = await Promise.all([
         fetch(`${API_BASE_URL}/regions`),
-        fetch(`${API_BASE_URL}/business-types`),
+        // fetch(`${API_BASE_URL}/business-types`),
       ])
       const regionData = await regionRes.json()
-      const businessTypeData = await businessTypeRes.json()
+      // const businessTypeData = await businessTypeRes.json()
       setRegions(regionData)
-      setBusinessTypes(businessTypeData)
+      // setBusinessTypes(businessTypeData)
     } catch (error) {
       console.error("Failed to fetch metadata:", error)
     }
@@ -208,7 +211,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
   }, [])
 
   const [selectedRegions, setSelectedRegions] = useState<string[]>([])
-  const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([])
+  // const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([])
   const [openDropdown, setOpenDropdown] = useState<"business" | "region" | null>(null)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -229,7 +232,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
 
   const clearFilters = () => {
     setSelectedRegions([])
-    setSelectedBusinessTypes([])
+    // setSelectedBusinessTypes([])
   }
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -245,14 +248,14 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
     accessRoles: ["admin"],
     tags: [], // Keep empty array for API compatibility
     regions: [],
-    businessTypes: [],
+    // businessTypes: [],
   })
 
   const { toast } = useToast()
 
   useEffect(() => {
     loadCatalogs()
-  }, [selectedBusinessTypes, selectedRegions])
+  }, [selectedRegions])
 
   useEffect(() => {
     loadCategories()
@@ -263,7 +266,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
       setLoading(true)
       const data = await catalogApi.getAll({
         regions: selectedRegions,
-        businessTypes: selectedBusinessTypes,
+        // businessTypes: selectedBusinessTypes,
       })
       setCatalogs(data)
     } catch (error) {
@@ -527,8 +530,8 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                         key={category._id}
                         onClick={() => setSelectedCategory(category._id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${isActive
-                            ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                           }`}
                       >
                         {Icon ? (
@@ -560,8 +563,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                 <>
                   <div className="flex flex-wrap justify-between items-center gap-4 py-4" ref={dropdownRef}>
                     <div className="w-fit flex items-center gap-2">
-                      {/* Business Type */}
-                      <div className="relative">
+                      {/* <div className="relative">
                         <button
                           onClick={() => setOpenDropdown(openDropdown === "business" ? null : "business")}
                           className="bg-white border w-64 border-gray-300 rounded-md px-4 py-2 text-sm flex items-center gap-2 hover:shadow-sm"
@@ -597,22 +599,20 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                                     />
                                     <span className="text-sm text-gray-700">{type.name}</span>
                                   </div>
-                                  {/* {typeof type.count === "number" && (
-                                    <span className="text-xs text-gray-500">({type.count})</span>
-                                  )} */}
                                 </label>
                               ))}
                             </motion.div>
                           )}
                         </AnimatePresence>
-                      </div>
+                      </div> */}
                     </div>
                     <div className="w-fit">
-                      {role === "admin" && <Button onClick={() => setIsAddModalOpen(true)}>Add New API</Button>}
+                      {role === "admin" && <Button onClick={() => setIsAddModalOpen(true)} className="flex gap-2">
+                        <Plus />Add New API</Button>}
                     </div>
                     <div className="w-full">
                       {/* Tags & Clear */}
-                      {(selectedRegions.length > 0 || selectedBusinessTypes.length > 0) && (
+                      {/* {(selectedRegions.length > 0 || selectedBusinessTypes.length > 0) && (
                         <div className="flex flex-wrap items-center gap-2 text-sm">
                           <span className="font-medium text-gray-700">
                             {selectedRegions.length + selectedBusinessTypes.length} results filtered by
@@ -657,7 +657,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                             Clear all
                           </button>
                         </div>
-                      )}
+                      )} */}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -843,7 +843,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                     </Select>
                   </div>
                   {/* Business Type */}
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label>Business Type</Label>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -884,7 +884,7 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                         ))}
                       </PopoverContent>
                     </Popover>
-                  </div>
+                  </div> */}
                   <div className="space-y-2">
                     <Label htmlFor="visibility">Visibility</Label>
                     <Select
@@ -1168,17 +1168,19 @@ export default function APICatalogDashboard({ role }: { role: "admin" | "user" }
                           <Code className="w-4 h-4 mr-2" />
                           View Documentation
                         </Button>
-                        <Button
-                          variant="outline"
-                          className="flex-1 bg-transparent"
-                          onClick={() => {
-                            setIsDetailDrawerOpen(false)
-                            handleEdit(selectedCatalog)
-                          }}
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
+                        {getUserRole() === "admin" && (
+                          <Button
+                            variant="outline"
+                            className="flex-1 bg-transparent"
+                            onClick={() => {
+                              setIsDetailDrawerOpen(false)
+                              handleEdit(selectedCatalog)
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                        )}
                       </div>
                     </div>
                     {/* Inline Doc Preview */}
