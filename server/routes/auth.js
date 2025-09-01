@@ -6,10 +6,13 @@ const router = express.Router();
 
 // Register
 // routes/auth.js (Register route)
+// Register
 router.post("/register", async (req, res) => {
   const { email, password, role, adminCode } = req.body;
   try {
-    const existing = await User.findOne({ email });
+    // Convert email to lowercase for case-insensitive matching
+    const normalizedEmail = email.toLowerCase();
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) return res.status(400).json({ message: "User already exists" });
 
     // Require a secret or invite for admin signups
@@ -22,7 +25,7 @@ router.post("/register", async (req, res) => {
       }
     }
 
-    const user = new User({ email, password, role: role === "admin" ? "admin" : "user" });
+    const user = new User({ email: normalizedEmail, password, role: role === "admin" ? "admin" : "user" });
     await user.save();
 
     const token = generateToken(user);
@@ -37,7 +40,9 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    // Convert email to lowercase for case-insensitive matching
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(400).json({ message: "Invalid credentials" });
     }

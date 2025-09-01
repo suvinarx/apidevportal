@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { Search, LogOut, X } from "lucide-react"
+import { Search, X } from "lucide-react"
 import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { Loader2 } from "lucide-react"
@@ -141,18 +141,40 @@ export default function DashboardHeader({ catalogs = [], handleViewDocumentation
               <span className="text-xl font-bold text-gray-800">API Developer Portal</span>
             </div>
 
-            {/* Right side - Search and logout icons */}
+            {/* Right side - Search and logout button */}
             <div className="flex items-center space-x-4">
               {isLoggedIn && (
-                <LogOut
-                  className="w-5 h-5 text-gray-600 cursor-pointer hover:text-[#006b50] transition-colors duration-200"
+                <button
                   onClick={logout}
-                />
+                  className="text-sm font-medium text-gray-600 hover:text-[#006b50] transition-colors duration-200 px-3 py-1.5 rounded-md hover:bg-gray-50"
+                >
+                  Logout
+                </button>
               )}
-              <Search
-                className="w-5 h-5 text-gray-600 cursor-pointer hover:text-[#006b50] transition-colors duration-200"
-                onClick={openSearch}
-              />
+              <div className="relative inline-flex group">
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  aria-label="Open search"
+                  aria-describedby="tip-search"
+                  className="p-1"
+                >
+                  <Search className="w-5 h-5 text-gray-600 cursor-pointer hover:text-[#006b50] transition-colors duration-200" />
+                </button>
+
+                {/* Tooltip anchored to the RIGHT so it won't overflow off-screen */}
+                <span
+                  id="tip-search"
+                  role="tooltip"
+                  className="pointer-events-none absolute top-full right-0 mt-2 z-50
+               whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs text-white
+               opacity-0 translate-y-1 scale-95 shadow-md transition
+               group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+               group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:scale-100"
+                >
+                  Open search to find catalogs & APIs
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -189,7 +211,7 @@ export default function DashboardHeader({ catalogs = [], handleViewDocumentation
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Enter Product, API, or keywords"
+                      placeholder="Search by catalog name/description/tags or API name/path"
                       value={searchQuery}
                       onChange={handleSearchChange}
                       className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-[#006b50] focus:outline-none focus:ring-2 focus:ring-[#006b50] focus:ring-opacity-20 transition-all"

@@ -17,7 +17,7 @@ router.get('/search', async (req, res) => {
         { description: { $regex: q, $options: 'i' } },
         { tags: { $regex: q, $options: 'i' } }
       ]
-    }).limit(10);
+    });
 
     // Search APIs
     const apis = await Api.find({
@@ -25,7 +25,7 @@ router.get('/search', async (req, res) => {
         { endpoint: { $regex: q, $options: 'i' } },
         { name: { $regex: q, $options: 'i' } }
       ]
-    }).populate('catalogId', 'name').limit(10);
+    }).populate('catalogId', 'name');
 
     // Format results
     res.json([
