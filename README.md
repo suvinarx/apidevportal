@@ -30,6 +30,13 @@ client:
 volumes:
   mongo_data:
 
+
+[ec2-user@ip-172-31-28-82 server]$ cat index.js 
+c
+  origin: "http://44.204.68.110:3000",  // React app on EC2
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
 ~                                                                                                                                                                                                                                                    
 ~                                                                                                                                                                                                                                                    
 ~                    
