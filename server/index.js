@@ -11,9 +11,14 @@ const regionRoutes = require('./routes/regionRoutes');
 const authRoutes = require('./routes/auth');
 
 const app = express();
+
+// CORS configuration from environment variable
+const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:3000";
 const corsOptions = {
-  origin: "http://44.204.68.110:3000",  // React app on EC2
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: corsOrigin.includes(',')
+    ? corsOrigin.split(',').map((origin) => origin.trim())
+    : corsOrigin,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -38,7 +43,7 @@ app.use('/api/apis', apiRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/regions', regionRoutes);
 // app.use('/api/business-types', businessTypeRoutes);
-app.use("/api/auth",authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Default route
 app.get('/', (req, res) => res.send('API Catalog backend is running!'));
