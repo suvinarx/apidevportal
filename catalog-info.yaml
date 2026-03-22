@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: apidevportal
+  description: |
+    MERN-based API Developer Portal project.
+  links:
+    - title: Website
+      url: http://ec2-34-205-185-172.compute-1.amazonaws.com:3000
+    - title: API Base URL
+      url: http://ec2-34-205-185-172.compute-1.amazonaws.com:5001/api
+  annotations:
+    github.com/project-slug: suvinarx/apidevportal
+spec:
+  type: service
+  owner: user:default/guest
+  lifecycle: production
