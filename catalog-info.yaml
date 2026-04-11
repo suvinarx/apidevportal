@@ -1,16 +1,11 @@
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: swagger-petstore
-  description: Swagger Petstore sample API
-  links:
-    - title: Petstore UI
-      url: https://petstore.swagger.io/
-    - title: OpenAPI Spec
-      url: https://petstore.swagger.io/v2/swagger.json
+  name: swagger-petstore3
+  description: Swagger Petstore v3 sample API
 spec:
   type: openapi
   lifecycle: production
-  owner: cnc
+  owner: guests
   definition:
-    $text: https://petstore.swagger.io/v2/swagger.json
+    $text: https://petstore3.swagger.io/api/v3/openapi.json
