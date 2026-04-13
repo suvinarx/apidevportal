@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: swagger-petstore3
-  description: Swagger Petstore v3 sample API
+  name: swagger-petstore4
+  description: Swagger Petstore v4 sample API
 spec:
   type: openapi
   lifecycle: production
