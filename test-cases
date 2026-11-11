@@ -1,5 +1,6 @@
-export AI_GATEWAY_URL="http://localhost:8000/v1/chat/completions"
-export MODEL="your-model-name"
+export AI_GATEWAY_URL="https://internal-kong-int-tst-ai-ue1-1059196812.us-east-1.elb.amazonaws.com/ai-route-pr/chat/completions"
+export MODEL="azure-gpt-5.4-mini"
+
 
 Test 1 — Normal request (baseline)
 curl -i -X POST "$AI_GATEWAY_URL" \
