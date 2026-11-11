@@ -1,13 +1,28 @@
-adasdad
-
-read -s "AZURE_NONPROD_KEY?Enter Nonprod Azure API key: "
+The syntax is different.
+Step 1 — Enter your Azure API key securely
+Run this in Git Bash:
+read -r -s -p "Enter Azure API key: " AZURE_FOUNDRY_KEY
 echo
 export AZURE_FOUNDRY_KEY
 
-export AZURE_OPENAI_ENDPOINT="https://srvc-unp0008852eus206aa.openai.azure.com"
 
+Paste your key and press Enter. The characters won't appear on screen.
+Step 2 — Verify the key is set
+if [ -n "$AZURE_FOUNDRY_KEY" ]; then
+  echo "Azure API key configured"
+else
+  echo "Azure API key is empty"
+fi
+
+
+Step 3 — Configure the Azure endpoint
+For the Foundry resource:
+export AZURE_OPENAI_ENDPOINT="https://foundry-unp0010652eus22872.cognitiveservices.azure.com"
+
+
+Step 4 — Test Azure directly
 curl -i -X POST \
-  "${AZURE_OPENAI_ENDPOINT}/openai/v1/chat/completions" \
+  "$AZURE_OPENAI_ENDPOINT/openai/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "api-key: $AZURE_FOUNDRY_KEY" \
   -d '{
@@ -15,7 +30,7 @@ curl -i -X POST \
     "messages": [
       {
         "role": "user",
-        "content": "Hello from Azure Nonprod"
+        "content": "Hello from Windows"
       }
     ]
   }'
