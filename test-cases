@@ -1,3 +1,6 @@
+export AI_GATEWAY_URL="http://localhost:8000/v1/chat/completions"
+export MODEL="your-model-name"
+
 Test 1 — Normal request (baseline)
 curl -i -X POST "$AI_GATEWAY_URL" \
   -H "Content-Type: application/json" \
