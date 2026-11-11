@@ -37,3 +37,52 @@ curl --ssl-no-revoke -i -X POST \
 
 
 
+You can run Podman directly from Git Bash on Windows.
+1. Verify Podman installation
+podman --version
+
+
+2. Initialize Podman machine
+podman machine init --provider wsl
+
+
+If the machine is already initialized, skip this step.
+3. Start Podman
+podman machine start
+
+
+Verify:
+podman machine list
+podman info
+
+
+4. Create and run a container
+For an Ubuntu container:
+podman run -dit \
+  --name ubuntu-test \
+  docker.io/library/ubuntu:24.04 \
+  bash
+
+
+Enter the container:
+winpty podman exec -it ubuntu-test bash
+
+
+winpty helps Git Bash handle interactive terminals on Windows.
+
+For an NGINX container:
+podman run -d \
+  --name nginx-test \
+  -p 8080:80 \
+  docker.io/library/nginx:latest
+
+
+Test:
+curl http://localhost:8080
+
+
+5. Manage containers
+podman ps -a
+podman start ubuntu-test
+podman stop ubuntu-test
+podman rm -f ubuntu-test
