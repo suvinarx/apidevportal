@@ -87,6 +87,7 @@ podman start ubuntu-test
 podman stop ubuntu-test
 podman rm -f ubuntu-test
 
-wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ
-
+export APIKEY='wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ'
+export BODY='{"model":"'"$MODEL"'","messages":[{"role":"user","content":"Explain API Gateway in two sentences."}]}'
+curl -k -i -X POST "$AI_GATEWAY_URL" -H "Content-Type: application/json" -H "apikey: $APIKEY" -d "$BODY"
 
