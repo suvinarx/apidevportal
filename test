@@ -21,7 +21,7 @@ export AZURE_OPENAI_ENDPOINT="https://foundry-unp0010652eus22872.cognitiveservic
 
 
 Step 4 — Test Azure directly
-curl -i -X POST \
+curl --ssl-no-revoke -i -X POST \
   "$AZURE_OPENAI_ENDPOINT/openai/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "api-key: $AZURE_FOUNDRY_KEY" \
@@ -34,3 +34,6 @@ curl -i -X POST \
       }
     ]
   }'
+
+
+
