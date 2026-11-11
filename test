@@ -1,1 +1,21 @@
 adasdad
+
+read -s "AZURE_NONPROD_KEY?Enter Nonprod Azure API key: "
+echo
+export AZURE_FOUNDRY_KEY
+
+export AZURE_OPENAI_ENDPOINT="https://srvc-unp0008852eus206aa.openai.azure.com"
+
+curl -i -X POST \
+  "${AZURE_OPENAI_ENDPOINT}/openai/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "api-key: $AZURE_FOUNDRY_KEY" \
+  -d '{
+    "model": "gpt-5.4-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello from Azure Nonprod"
+      }
+    ]
+  }'
