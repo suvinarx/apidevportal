@@ -93,7 +93,7 @@ export MODEL="azure-gpt-5.4-mini"
 
 bash kong_guardrails_gitbash_v2.sh
 
-
+export INSECURE_TLS=true
 export APIKEY='wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ'
 export BODY='{"model":"'"$MODEL"'","messages":[{"role":"user","content":"Explain API Gateway in two sentences."}]}'
 curl -k -i -X POST "$AI_GATEWAY_URL" -H "Content-Type: application/json" -H "apikey: $APIKEY" -d "$BODY"
