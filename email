@@ -1,0 +1,30 @@
+Hi Team,
+
+Quick update on the Kong AI Gateway POC. We have completed the initial guardrails configuration and regression testing for the **sb-ai-gw** gateway integrated with Azure OpenAI (GPT-5.4-mini).
+
+**Configuration Updates:**
+- **AI Prompt Guard:** Enhanced the existing policy with six deny patterns covering SQL-related commands, prompt injection attempts, SSN/credit card references, and system prompt extraction.
+- **AI Rate Limiting:** Configured an active limit of 10,000 tokens per 60 seconds, with the duplicate test policy disabled.
+- **API Key Authentication:** Validated authentication and successful routing through Kong to Azure OpenAI.
+- **AI Sanitizer:** Removed from the current configuration due to an external service connectivity issue.
+
+**Testing Results:**
+
+Executed 26 guardrail test scenarios covering prompt injection, jailbreak attempts, encoded instructions, sensitive information, harmful content, and normal requests.
+
+- **15 PASS:** Expected HTTP behavior confirmed.
+- **11 REVIEW:** Additional validation required for scenarios not covered by the current regex-based policies.
+- **0 FAIL:** No unexpected HTTP results.
+
+We also confirmed two distinct security behaviors:
+- **Gateway-level blocking:** Kong Prompt Guard rejected matching SQL-related prompts with HTTP 400 before forwarding them to Azure OpenAI.
+- **Model-level protection:** An encoded prompt injection passed through Kong, but the Azure OpenAI model recognized the instruction as untrusted and did not follow it.
+
+**Next Steps:**
+
+We plan to evaluate semantic prompt protection, additional PII/secret detection, and centralized logging to improve coverage beyond the current regex-based controls. We also need to validate rate-limit enforcement under load.
+
+I have also prepared the end-to-end PlantUML architecture diagram showing request routing, policy enforcement, and Azure OpenAI integration.
+
+Thanks,  
+Nitin
