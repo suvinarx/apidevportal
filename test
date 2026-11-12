@@ -98,3 +98,6 @@ export APIKEY='wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ'
 export BODY='{"model":"'"$MODEL"'","messages":[{"role":"user","content":"Explain API Gateway in two sentences."}]}'
 curl -k -i -X POST "$AI_GATEWAY_URL" -H "Content-Type: application/json" -H "apikey: $APIKEY" -d "$BODY"
 
+
+cat kong-guardrails-20261112-095718/GR-17.json
+cat kong-guardrails-20261112-095718/GR-04.json
