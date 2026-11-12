@@ -87,6 +87,13 @@ podman start ubuntu-test
 podman stop ubuntu-test
 podman rm -f ubuntu-test
 
+export GATEWAY_URL="https://YOUR-GATEWAY-HOST/ai/v1/chat/completions"
+export APIKEY='wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ'
+export MODEL="azure-gpt-5.4-mini"
+
+bash kong_guardrails_gitbash_v2.sh
+
+
 export APIKEY='wJhXfCGKwDC2WUzQffpg4YSSyrZDvgMJ'
 export BODY='{"model":"'"$MODEL"'","messages":[{"role":"user","content":"Explain API Gateway in two sentences."}]}'
 curl -k -i -X POST "$AI_GATEWAY_URL" -H "Content-Type: application/json" -H "apikey: $APIKEY" -d "$BODY"
