@@ -105,22 +105,14 @@ for prompt in \
   echo "=================================="
   echo "Testing: $prompt"
 
-  payload=$(jq -n --arg p "$prompt" '{
-    model: "azure-gpt-5.4-mini",
-    messages: [
-      {role: "user", content: $p}
-    ],
-    max_completion_tokens: 100
-  }')
-
   curl -sk \
     -o guard-response.json \
     -w "HTTP %{http_code}\n" \
     -X POST "$GATEWAY_URL" \
     -H "Content-Type: application/json" \
     -H "apikey: $APIKEY" \
-    -d "$payload"
+    -d "{\"model\":\"azure-gpt-5.4-mini\",\"messages\":[{\"role\":\"user\",\"content\":\"$prompt\"}],\"max_completion_tokens\":100}"
 
-  jq -c '.' guard-response.json
+  cat guard-response.json
   echo
 done
