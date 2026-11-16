@@ -123,13 +123,28 @@ done
 
 
 ACME_CORP_API_KEY = 3fbef639c739e0e8cad2da149fd12640ee424d429c2793d2
-
+BETA_INC_API_KEY = eaf57d0357658c41d5b0ad597cd7525b7b85cd0f90a186e2
 
 
 curl -sS -i \
   "${KONNECT_PROXY_URL%/}/ai/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "apikey: ${ACME_CORP_API_KEY}" \
+  -d '{
+    "model": "azure-gpt-5.4-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly: Acme test successful"
+      }
+    ],
+    "max_tokens": 30
+  }'
+
+curl -sS -i \
+  "${KONNECT_PROXY_URL%/}/ai/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "apikey: ${BETA_INC_API_KEY}" \
   -d '{
     "model": "azure-gpt-5.4-mini",
     "messages": [
