@@ -157,7 +157,23 @@ curl -sS -i \
   }'
 
 
+curl -sS -k -D /tmp/acme-headers.txt \
+  -o /tmp/acme-response.json \
+  "${AI_GATEWAY_URL_router%/}/ai/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "apikey: ${ACME_CORP_API_KEY}" \
+  -d '{
+    "model": "azure-gpt-5.4-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly: Acme isolation verified"
+      }
+    ],
+    "max_tokens": 30
+  }'
 
+grep -iE 'HTTP/|X-AI-RateLimit-' /tmp/acme-headers.txt
 
 
 
