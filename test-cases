@@ -122,8 +122,9 @@ done
 
 
 
-ACME_CORP_API_KEY = 3fbef639c739e0e8cad2da149fd12640ee424d429c2793d2
-BETA_INC_API_KEY = eaf57d0357658c41d5b0ad597cd7525b7b85cd0f90a186e2
+export ACME_CORP_API_KEY="3fbef639c739e0e8cad2da149fd12640ee424d429c2793d2"
+export BETA_INC_API_KEY="eaf57d0357658c41d5b0ad597cd7525b7b85cd0f90a186e2"
+export GAMMA_LLC_API_KEY="f914b23b1dd915d5685f237415fa7ac9348dbdf2d4e8f82d"
 
 
 curl -sS -i \
@@ -174,6 +175,28 @@ curl -sS -k -D /tmp/acme-headers.txt \
   }'
 
 grep -iE 'HTTP/|X-AI-RateLimit-' /tmp/acme-headers.txt
+
+
+
+
+curl -sS -k \
+  -D /tmp/gamma-headers.txt \
+  -o /tmp/gamma-response.json \
+  "${KONNECT_PROXY_URL%/}/ai/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "apikey: ${GAMMA_LLC_API_KEY}" \
+  -d '{
+    "model": "azure-gpt-5.4-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly: Gamma group test successful"
+      }
+    ],
+    "max_tokens": 30
+  }'
+
+
 
 
 
