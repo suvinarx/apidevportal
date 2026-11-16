@@ -197,6 +197,9 @@ curl -sS -k \
   }'
 
 
+grep -iE 'HTTP/|X-AI-RateLimit-' /tmp/gamma-headers.txt
+cat /tmp/gamma-response.json | jq .
+
 
 
 
