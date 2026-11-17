@@ -1,4 +1,4 @@
-# Kong AI Gateway — Consumer & Group Rate Limiting (UC-07 & UC-08)
+# Kong AI Gateway — Consumer & Group Rate Limiting 
 
 ## Overview
 
@@ -80,17 +80,7 @@ These policies help a shared AI Gateway serve multiple applications with differe
 
 Those behaviors require additional targeted tests.
 
-## Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| HTTP 404 | Verify the endpoint path; avoid duplicate `/ai/v1` segments. |
-| HTTP 401 | Verify the API key is present and valid. |
-| HTTP 403 | Inspect authorization and gateway policy responses. |
-| HTTP 429 | Check whether the applicable rate limit has been exceeded. |
-| HTTP 503 | Check gateway/upstream model availability. |
-| TLS certificate error | Check hostname/certificate matching; `curl -k` is only a temporary internal diagnostic workaround. |
-| Quota headers missing | Inspect response status, consumer identity, and rate-limit policy configuration. |
 
 ## Summary
 
