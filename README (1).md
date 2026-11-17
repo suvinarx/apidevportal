@@ -6,9 +6,9 @@
 
 | Use case | API consumer | Policy source | Expected limit |
 | --- | --- | --- | --- |
-| 07 | `acme-corp` | Consumer's Gold policy | 100,000 tokens/hour |
-| 07 | `beta-inc` | Consumer's Standard policy | 20,000 tokens/hour |
-| 08 | `gamma-llc` | `partner-tier` consumer group | 50,000 tokens/hour |
+| 01 | `acme-corp` | Consumer's Gold policy | 100,000 tokens/hour |
+| 02 | `beta-inc` | Consumer's Standard policy | 20,000 tokens/hour |
+| 03 | `gamma-llc` | `partner-tier` consumer group | 50,000 tokens/hour |
 
 The script calls **Acme → Beta → Gamma → Acme again**. For every request, it checks for **HTTP 200** and the expected `X-AI-RateLimit-Limit-hour-policy-1` and `X-AI-RateLimit-Remaining-hour-policy-1` response headers. The second Acme call shows how its remaining balance changes over time. It prints PASS/FAIL and exits with an error if a request fails. **It does not deploy or modify gateway resources.**
 
