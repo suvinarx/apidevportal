@@ -101,3 +101,7 @@ curl -k -i -X POST "$AI_GATEWAY_URL" -H "Content-Type: application/json" -H "api
 
 cat kong-guardrails-20261112-095718/GR-17.json
 cat kong-guardrails-20261112-095718/GR-04.json
+
+
+
+![AI Guardrails Architecture](guardrails-architecture.png)
